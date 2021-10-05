@@ -3,6 +3,8 @@
 //This file is part of the 电梯模拟器.
 
 #include "mainwindow.hpp"
+#include "queue.hpp"
+#include <iostream>
 namespace gui
 {
 mainwindow::mainwindow()
