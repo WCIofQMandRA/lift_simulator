@@ -1,4 +1,4 @@
-//lift_t.hpp: 电梯
+//lift.hpp: 电梯
 //Copyright (C) 2021-2022 张子辰
 //This file is part of the 电梯模拟器.
 #pragma once
@@ -12,13 +12,14 @@ class lift_t
 public:
 	lift_t()=default;
 	lift_t(const lift_t&)=delete;
-	friend class wbutton_t;
 	void press_floor(int floor);//按楼层键
 	void press_close();//按关门键
-private:
+	
 	void move_to(int floor);//移动到floor层
+	uint64_t move_to_time(int floor);//查询移动到指定楼层的预期用时
 	void open_door();
 	void close_door();
+private:
 	bool m_is_door_open;//是否开门
 	int16_t m_floor;//楼层
 	int16_t m_direction;//移动方向：-1 0 1
@@ -36,10 +37,18 @@ public:
 	bool is_down_pressed(int floor)const;
 	void press_up(int floor);
 	void press_down(int floor);
-	friend class lift_t;
-private:
 	void switch_off_up(int floor);//关闭向上的按钮，用lift_t类触发
 	void switch_off_down(int floor);
+private:
 	uint64_t m_up_pressed;//向上的按钮被按下
 	uint64_t m_down_pressed;//向下的按钮被按下
+};
+
+class event_press_wbutton:public event_t
+{
+public:
+	//按下按钮的时间，方向，楼层
+	event_press_wbutton(uint64_t time,int32_t dire,int32_t floor);
+	void call()const override;
+	int32_t dire,floor;
 };

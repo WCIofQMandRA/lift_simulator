@@ -1,6 +1,7 @@
 //queue.hpp: 队列和优先队列
 //Copyright (C) 2021-2022 张子辰
 //This file is part of the 电梯模拟器.
+#pragma once
 #include <cstdint>
 #include <utility>
 #include <stdexcept>
@@ -138,7 +139,7 @@ public:
 	{
 		size_t i=0;
 		--m_size;
-		heap[0]=heap[m_size];
+		heap[0]=std::move(heap[m_size]);
 		while(true)
 		{
 			if(i*2+1<m_size)
@@ -195,6 +196,18 @@ public:
 			else break;
 		}
 	}
+	void push(T &&x)
+	{
+		if(m_size==m_capcity)
+			re_allocate(m_capcity==0?8:m_capcity*2);
+		heap[m_size++]=std::move(x);
+		for(size_t i=m_size-1;i;i=(i-1)/2)
+		{
+			if(cmp(heap[(i-1)/2],heap[i]))
+				std::swap(heap[(i-1)/2],heap[i]);
+			else break;
+		}
+	}
 	constexpr size_t size()const noexcept
 	{
 		return m_size;
@@ -208,7 +221,7 @@ private:
 	{
 		T *new_heap=new T[new_capcity];
 		for(size_t i=0;i<m_size;++i)
-			new_heap[i]=heap[i];
+			new_heap[i]=std::move(heap[i]);
 		delete[] heap;
 		m_capcity=new_capcity;
 		heap=new_heap;

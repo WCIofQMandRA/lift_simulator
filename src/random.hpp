@@ -7,19 +7,19 @@
 #include <cstdint>
 #include <type_traits>
 
-extern mt19937_64 rand_engine;
+extern std::mt19937_64 rand_engine;
 
-template<typename T,typename U=std::enable_if_t<is_integral_v<T>,T>>
-U rand_between(T a,T b)
+template<typename T,std::enable_if_t<std::is_integral_v<T>,int> U=0>
+T rand_between(T a,T b)
 {
-	std::uniform_int_distribution<U> r(a,b);
+	std::uniform_int_distribution<T> r(a,b);
 	return r(rand_engine);
 }
 
-template<typename T,typename U=std::enable_if_t<is_floating_point_v<T>,T>>
-U rand_between(T a,T b)
+template<typename T,std::enable_if_t<std::is_floating_point_v<T>,int> U=1>
+T rand_between(T a,T b)
 {
-	std::uniform_real_distribution<U> r(a,b);
+	std::uniform_real_distribution<T> r(a,b);
 	return r(rand_engine);
 }
 

@@ -1,3 +1,8 @@
+//constants.hpp: 常量
+//Copyright (C) 2021-2022 张子辰
+//This file is part of the 电梯模拟器.
+
+#pragma once
 #include <cstdint>
 #include <utility>
 #include <array>
@@ -29,9 +34,12 @@ constexpr double tolerance_tick_rate=0.4;//等待电梯的忍耐时间与走楼�
 constexpr uint64_t min_take_lift_up=4;//上楼时，选择乘坐电梯的最小楼层差
 constexpr uint64_t min_take_lift_down=5;//下楼时，选择乘坐电梯的最小楼层差
 
-constexpr int32_t max_floor=13,min_floor=1,base_floor=2;
+constexpr int32_t max_floor=12,min_floor=0,base_floor=1;
 constexpr std::array<int32_t,2> waiting_floor={1,7};//待命楼层
 constexpr std::pair<double,double> passenger_weight_range={40,80};//乘客质量
+constexpr std::pair<int,int> passenger_number_range={2800,4000};//一天进出楼的人数
+//constexpr std::pair<int,int> passenger_number_range={5,5};//一天进出楼的人数
+constexpr std::pair<uint64_t,uint64_t> take_lift_time={216000,828000};//一天内有人坐电梯的时段
 
 constexpr double max_weight=1000;//电梯载重量
 }

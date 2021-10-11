@@ -3,4 +3,4 @@
 //This file is part of the 电梯模拟器.
 #include "random.hpp"
 
-mt19937_64 rand_engine;
+std::mt19937_64 rand_engine;
