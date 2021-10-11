@@ -9,7 +9,7 @@ add_compile_options(-Wall -Wextra -Wpedantic -Wformat=2 -Wconversion)
 
 set(OUTPUT_DIR ${CMAKE_BINARY_DIR}/output)
 
-find_package(PkgConfig)
-pkg_check_modules(gtkmm REQUIRED gtkmm-3.0)
+#find_package(PkgConfig)
+#pkg_check_modules(gtkmm REQUIRED gtkmm-3.0)
 
 add_subdirectory(src)
