@@ -41,7 +41,7 @@ constexpr std::pair<double,double> passenger_weight_range={40,80};//乘客质量
 #ifdef NDEBUG
 constexpr std::pair<int,int> passenger_number_range={2800,4000};//一天进出楼的人数
 #else
-constexpr std::pair<int,int> passenger_number_range={5,10};//一天进出楼的人数
+constexpr std::pair<int,int> passenger_number_range={100,150};//一天进出楼的人数
 #endif
 constexpr std::pair<uint64_t,uint64_t> take_lift_time={216000,828000};//一天内有人坐电梯的时段
 
