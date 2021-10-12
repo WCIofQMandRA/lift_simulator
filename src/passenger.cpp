@@ -19,7 +19,7 @@ passenger_t passenger_t::generate(int32_t from,uint64_t appear_time)
 		return {rand_between<int>(0,2)?rand_between<int32_t>(min_floor,base_floor):base_floor,PID++,rand_between(passenger_weight_range),appear_time};
 }
 
-event_passenger_appear::event_passenger_appear(uint64_t time,int32_t src):
+event_passenger_appear::event_passenger_appear(uint64_t time,int16_t src):
 	event_t(time,"乘客出现"),source(src),passenger(passenger_t::generate(src,time)){}
 
 void event_passenger_appear::call()const
@@ -28,18 +28,19 @@ void event_passenger_appear::call()const
 	if(passenger.destination>source)
 	{
 		if(!wall_buttons.is_up_pressed(source))
-			event_queue.push(std::make_unique<event_press_wbutton>(time,1,source));
+			event_queue.push(std::make_unique<event_press_wbutton>(time+constant::press_button_tick,1,source));
 	}
 	else
 	{
 		if(!wall_buttons.is_down_pressed(source))
-			event_queue.push(std::make_unique<event_press_wbutton>(time,-1,source));
+			event_queue.push(std::make_unique<event_press_wbutton>(time+constant::press_button_tick,-1,source));
 	}
 	waiting_queues[source].push(passenger);
 }
 
-void event_passenger_appear::print(std::ostream &os)const
+bool event_passenger_appear::print(std::ostream &os)const
 {
 	event_t::print(os);
 	os<<"#"<<passenger.ID<<", "<<source<<"->"<<passenger.destination<<", "<<passenger.weight<<"kg\n";
+	return true;
 }

@@ -15,7 +15,7 @@ class event_t
 public:
 	event_t(uint64_t time,const std::string &name);
 	virtual void call()const=0;						//完成event需要进行的操作
-	virtual void print(std::ostream &)const;		//输出操作的情况
+	virtual bool print(std::ostream &)const;		//输出操作的情况, 返回是否真的输出了内容
 	virtual ~event_t()=default;
 	uint64_t time;									//事件发生的时间
 	uint64_t order;									//事件被创建的顺序（用于确定同一时刻的多个事件的处理顺序）

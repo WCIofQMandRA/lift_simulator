@@ -8,9 +8,10 @@ uint64_t event_t::event_order=0;
 event_t::event_t(uint64_t time,const std::string &name):
 	time(time),order(event_order++),name(name){}
 
-void event_t::print(std::ostream &os)const
+bool event_t::print(std::ostream &os)const
 {
 	output_time(os)<<"\t"<<name<<"\n";
+	return true;
 }
 
 std::ostream& event_t::output_time(std::ostream &os)const

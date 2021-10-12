@@ -19,10 +19,10 @@ class event_passenger_appear:public event_t
 {
 public:
 	//出现时间，乘坐电梯的起点
-	event_passenger_appear(uint64_t time,int32_t src);
+	event_passenger_appear(uint64_t time,int16_t src);
 	void call()const override;
-	void print(std::ostream &)const override;
+	bool print(std::ostream &)const override;
 private:
-	int32_t source;
+	int16_t source;
 	passenger_t passenger;
 };
