@@ -7,10 +7,12 @@
 
 struct passenger_t
 {
-	int32_t destination;
+	int32_t source,destination;
 	uint32_t ID;
 	double weight;
-	uint64_t appear_time;
+	uint64_t appear_time;//出现时间
+	uint64_t tolerance_time;//最大等待时间
+	uint64_t arrive_time;//到达时间
 	static passenger_t generate(int32_t from,uint64_t appear_time);
 };
 
@@ -23,6 +25,16 @@ public:
 	void call()const override;
 	bool print(std::ostream &)const override;
 private:
-	int16_t source;
+	passenger_t passenger;
+};
+
+//乘客走楼梯, 这一事件无后效性，可以在任何时候处理
+class event_passenger_walk:public event_t
+{
+public:
+	event_passenger_walk(uint64_t time,passenger_t passenger);
+	void call()const override;
+	bool print(std::ostream &)const override;
+private:
 	passenger_t passenger;
 };
