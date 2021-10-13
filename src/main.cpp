@@ -22,7 +22,7 @@ void generate_passengers()
 		if(rand_between(0,1))
 			start=rand_between(min_floor,base_floor);
 		else start=rand_between<int16_t>(base_floor+1,max_floor);
-		variable::event_queue.push(std::make_unique<event_passenger_appear>(rand_between(take_lift_time),start));
+		variable::event_queue.push<event_passenger_appear>(rand_between(take_lift_time),start);
 	}
 }
 
@@ -33,12 +33,11 @@ int main([[maybe_unused]]int argc,[[maybe_unused]]char **argv)
 	using namespace variable;
 	while(!event_queue.empty())
 	{
-		bool printed=event_queue.top()->print(std::cout);
-		event_queue.top()->call();
+		bool printed=event_queue.print(std::cout);
+		event_queue.call_and_pop();
 		//call()函数可能有输出，所以在call之后才输出用于分割的空行
-		if(printed)std::cout<<std::endl;
-		event_queue.pop();
-		if(printed)while(getchar()!='\n');
+		if(printed)std::cout<<"\n";
+		if(printed)system(R"(read -s -n 1 -p "请按任意键继续..." && echo "")");
 	}
 	return 0;
 }

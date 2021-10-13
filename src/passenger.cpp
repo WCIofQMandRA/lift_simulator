@@ -28,13 +28,13 @@ void event_passenger_appear::call()const
 	if(passenger.destination>source)
 	{
 		if(!wall_buttons.is_up_pressed(source))
-			event_queue.push(std::make_unique<event_press_wbutton>(time+constant::press_button_tick,1,source));
+			event_queue.push<event_press_wbutton>(time+constant::press_button_tick,1,source);
 		waiting_queues_up[source].push(passenger);
 	}
 	else
 	{
 		if(!wall_buttons.is_down_pressed(source))
-			event_queue.push(std::make_unique<event_press_wbutton>(time+constant::press_button_tick,-1,source));
+			event_queue.push<event_press_wbutton>(time+constant::press_button_tick,-1,source);
 		waiting_queues_down[source].push(passenger);
 	}
 }

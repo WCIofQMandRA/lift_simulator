@@ -15,5 +15,4 @@ extern event_queue_t event_queue;		                //事件队列
 extern std::array<zzc::queue<passenger_t>,constant::max_floor-constant::min_floor+1> waiting_queues_up,waiting_queues_down;
 extern wbutton_t wall_buttons;			                //每层楼墙上的按钮
 extern std::array<lift_t,2> lifts;		                //两部电梯
-extern std::unordered_set<std::string> event_happening; //正在发生的事件
 }

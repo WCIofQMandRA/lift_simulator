@@ -5,8 +5,8 @@
 
 uint64_t event_t::event_order=0;
 
-event_t::event_t(uint64_t time,const std::string &name):
-	time(time),order(event_order++),name(name){}
+event_t::event_t(uint64_t time,const std::string &name,const std::string &sign):
+	time(time),order(event_order++),name(name),signature(sign){}
 
 bool event_t::print(std::ostream &os)const
 {
@@ -30,3 +30,5 @@ std::ostream& event_t::output_time(std::ostream &os)const
 	t[8]=static_cast<char>(s%10+48);
 	return os<<t;
 }
+
+std::unordered_set<std::string> event_queue_t::event_happening(256);
