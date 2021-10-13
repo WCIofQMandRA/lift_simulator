@@ -115,6 +115,8 @@ private:
 	void add_pressed_button(uint64_t time,int16_t floor);
 	void remove_called_up_floor();
 	void remove_called_down_floor();
+	void remove_called_up_floor(int16_t);
+	void remove_called_down_floor(int16_t);
 	void remove_pressed_button();
 	bool is_pressed();//电梯内的m_floor层按钮是否被按下
 	bool is_pressed_lower();//电梯内，在m_floor层下方的按钮是否被按下

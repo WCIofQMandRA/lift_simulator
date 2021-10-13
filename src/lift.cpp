@@ -39,6 +39,14 @@ void lift_t::remove_called_down_floor()
 {
 	m_called_down_floor&=~((uint64_t)1<<(m_floor-constant::min_floor));
 }
+void lift_t::remove_called_up_floor(int16_t floor)
+{
+	m_called_up_floor&=~((uint64_t)1<<(floor-constant::min_floor));
+}
+void lift_t::remove_called_down_floor(int16_t floor)
+{
+	m_called_down_floor&=~((uint64_t)1<<(floor-constant::min_floor));
+}
 void lift_t::remove_pressed_button()
 {
 	m_pressed_button&=~((uint64_t)1<<(m_floor-constant::min_floor));
@@ -131,10 +139,14 @@ void wbutton_t::press_down(uint64_t time,int16_t floor)
 void wbutton_t::switch_off_up(int16_t floor)
 {
 	m_up_pressed&=~((uint64_t)1<<(floor-constant::min_floor));
+	for(auto &i:variable::lifts)
+		i.remove_called_up_floor(floor);
 }
 void wbutton_t::switch_off_down(int16_t floor)
 {
 	m_down_pressed&=~((uint64_t)1<<(floor-constant::min_floor));
+	for(auto &i:variable::lifts)
+		i.remove_called_down_floor(floor);
 }
 
 //////////////////////////////////////////
@@ -251,16 +263,16 @@ void event_check_lift_state::call()const
 		assert(lift->m_waiting_floor==-1);
 		if(lift->m_is_door_open)
 		{
-			if(lift->m_passengers[lift->m_floor].size())
+			if(lift->m_passengers[lift->m_floor-constant::min_floor].size())
 				event_queue.push<event_passenger_out>(time+rand_between(constant::iolift_tick_range),lift);
-			else if(variable::waiting_queues_down[lift->m_floor].size())
+			else if(variable::waiting_queues_down[lift->m_floor-constant::min_floor].size())
 			{
-				auto &pass=variable::waiting_queues_down[lift->m_floor].front();
+				auto &pass=variable::waiting_queues_down[lift->m_floor-constant::min_floor].front();
 				//乘客已等待超时
 				if(pass.appear_time+pass.tolerance_time<time)
 				{
 					event_queue.push<event_passenger_walk>(pass.appear_time+pass.tolerance_time,pass);
-					variable::waiting_queues_down[lift->m_floor].pop();
+					variable::waiting_queues_down[lift->m_floor-constant::min_floor].pop();
 				}
 				//电梯没有满员
 				else if(lift->m_carrying_weight<constant::full_weight)
@@ -310,16 +322,16 @@ void event_check_lift_state::call()const
 		assert(lift->m_waiting_floor==-1);
 		if(lift->m_is_door_open)
 		{
-			if(lift->m_passengers[lift->m_floor].size())
+			if(lift->m_passengers[lift->m_floor-constant::min_floor].size())
 				event_queue.push<event_passenger_out>(time+rand_between(constant::iolift_tick_range),lift);
-			else if(variable::waiting_queues_up[lift->m_floor].size())
+			else if(variable::waiting_queues_up[lift->m_floor-constant::min_floor].size())
 			{
-				auto &pass=variable::waiting_queues_up[lift->m_floor].front();
+				auto &pass=variable::waiting_queues_up[lift->m_floor-constant::min_floor].front();
 				//乘客已等待超时
 				if(pass.appear_time+pass.tolerance_time<time)
 				{
 					event_queue.push<event_passenger_walk>(pass.appear_time+pass.tolerance_time,pass);
-					variable::waiting_queues_up[lift->m_floor].pop();
+					variable::waiting_queues_up[lift->m_floor-constant::min_floor].pop();
 				}
 				//电梯没有满员
 				else if(lift->m_carrying_weight<constant::full_weight)
