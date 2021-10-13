@@ -3,60 +3,9 @@
 //This file is part of the 电梯模拟器.
 #pragma once
 #include <cstdint>
-#include "event_queue.hpp"
-#include "preprocessor.h"
-
-#define ADD_FRIEND_IMPL(x) friend class event_##x
-
-#define ADD_FRIEND(...) ZZCPP_FOR_EACH(ADD_FRIEND_IMPL,;,__VA_ARGS__)
 
 class wbutton_t;
 class lift_t;
-
-//检查电梯状态（电梯将决定继续移动还是停止）
-class event_check_lift_state:public event_t
-{
-public:
-	event_check_lift_state(uint64_t time,lift_t *which_lift);
-	void call()const override;
-	bool print(std::ostream&)const override{return false;}//不输出
-private:
-	
-	lift_t *lift;
-};
-
-//令电梯位于指定层
-class event_arrive_at:public event_t
-{
-public:
-	event_arrive_at(uint64_t time,lift_t *which_lift,int16_t floor);
-	void call()const override;
-private:
-	lift_t *lift;int16_t floor;
-};
-
-//改变电梯的运动状态
-class event_change_direction:public event_t
-{
-public:
-	event_change_direction(uint64_t time,lift_t *which_lift,int16_t dire);
-	void call()const override;
-	bool print(std::ostream&)const override{return false;}
-private:
-	lift_t *lift;
-	int16_t dire;
-};
-
-//电梯开关门
-class event_open_door:public event_t
-{
-public:
-	event_open_door(uint64_t time,lift_t *which_lift,bool open);
-	void call()const override;
-private:
-	lift_t *lift;
-	bool open;
-};
 
 //电梯
 //电梯的移动策略：
@@ -69,15 +18,14 @@ class lift_t
 {
 public:
 	friend class wbutton_t;
-	ADD_FRIEND(check_lift_state,arrive_at,change_direction,open_door);
 	lift_t(int16_t ID):m_liftID(ID){}
 	lift_t(const lift_t&)=delete;
-	void press_floor(uint64_t time,int16_t floor);//按楼层键
-	void press_close(uint64_t time);//按关门键
+	void press_floor(int16_t floor);//按楼层键
+	void press_close();//按关门键
 private:
-	void add_called_up_floor(uint64_t time,int16_t floor);//将floor添加到m_called_up_floor中
-	void add_called_down_floor(uint64_t time,int16_t floor);
-	void add_pressed_button(uint64_t time,int16_t floor);
+	void add_called_up_floor(int16_t floor);//将floor添加到m_called_up_floor中
+	void add_called_down_floor(int16_t floor);
+	void add_pressed_button(int16_t floor);
 	void remove_called_up_floor();
 	void remove_called_down_floor();
 	void remove_pressed_button();
@@ -91,10 +39,10 @@ private:
 	bool is_called_down_lower();
 	bool is_called_down_upper();
 	uint64_t move_to_time(int16_t floor);//查询移动到指定楼层的预期用时
-	void open_door(uint64_t time);
-	void close_door(uint64_t time);
-	void move_to(uint64_t time,int16_t floor);//移动到指定楼层
-	void check_state(uint64_t time);//检查状态
+	void open_door();
+	void close_door();
+	void move_to(int16_t floor);//移动到指定楼层
+	void check_state();//检查状态
 private:
 	bool m_is_door_open=false;//是否开门
 	//若电梯正在返回或已经位于待命层，则为0/1，否则为-1
@@ -116,32 +64,20 @@ private:
 	uint64_t m_called_down_floor=0,m_called_up_floor=0;//呼叫电梯的楼层
 };
 
-//按下墙上的按钮
-class event_press_wbutton:public event_t
-{
-public:
-	//按下按钮的时间，方向，楼层
-	event_press_wbutton(uint64_t time,int16_t dire,int16_t floor);
-	void call()const override;
-private:
-	int16_t dire,floor;
-};
-
 //位于每层楼墙上的按钮
 class wbutton_t
 {
 public:
 	friend class lift_t;
-	ADD_FRIEND(press_wbutton,check_lift_state);
 	wbutton_t()=default;
 	wbutton_t(const wbutton_t&)=delete;
 	bool is_up_pressed(int16_t floor)const;
 	bool is_down_pressed(int16_t floor)const;
-	void press_up(uint64_t time,int16_t floor);
-	void press_down(uint64_t time,int16_t floor);
+	void press_up(int16_t floor);
+	void press_down(int16_t floor);
 private:
-	void switch_off_up(uint64_t time,int16_t floor);//关闭向上的按钮
-	void switch_off_down(uint64_t time,int16_t floor);
+	void switch_off_up(int16_t floor);//关闭向上的按钮
+	void switch_off_down(int16_t floor);
 private:
 	uint64_t m_up_pressed;//向上的按钮被按下
 	uint64_t m_down_pressed;//向下的按钮被按下
