@@ -18,7 +18,7 @@ void generate_passengers()
 	int n_passengers=rand_between(passenger_number_range);
 	while(n_passengers--)
 	{
-		int start;
+		int16_t start;
 		if(rand_between(0,1))
 			start=rand_between(min_floor,base_floor);
 		else start=rand_between<int16_t>(base_floor+1,max_floor);

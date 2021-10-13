@@ -7,13 +7,13 @@
 
 struct passenger_t
 {
-	int32_t source,destination;
+	int16_t source,destination;
 	uint32_t ID;
 	double weight;
 	uint64_t appear_time;//出现时间
 	uint64_t tolerance_time;//最大等待时间
 	uint64_t arrive_time;//到达时间
-	static passenger_t generate(int32_t from,uint64_t appear_time);
+	static passenger_t generate(int16_t from,uint64_t appear_time);
 };
 
 //乘客出现事件

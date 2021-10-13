@@ -6,6 +6,7 @@
 #include "event_queue.hpp"
 #include "passenger.hpp"
 #include "preprocessor.h"
+#include "constants.hpp"
 
 #define ADD_FRIEND_IMPL(x) friend class event_##x
 

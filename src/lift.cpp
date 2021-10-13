@@ -105,7 +105,7 @@ void event_check_lift_state::call()const
 	if(lift->m_direction==-2)
 	{
 		//需要在当前楼层开门——减速
-		if(lift->is_called_down()&&lift->m_carrying_weight<constant::full_weight
+		if((lift->is_called_down()&&lift->m_carrying_weight<constant::full_weight)
 			||lift->is_pressed())
 		{
 			lift->m_waiting_floor=-1;
@@ -148,7 +148,7 @@ void event_check_lift_state::call()const
 	else if(lift->m_direction==2)
 	{
 		//需要在当前楼层开门——减速
-		if(lift->is_called_up()&&lift->m_carrying_weight<constant::full_weight
+		if((lift->is_called_up()&&lift->m_carrying_weight<constant::full_weight)
 			||lift->is_pressed())
 		{
 			lift->m_waiting_floor=-1;
