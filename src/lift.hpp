@@ -80,6 +80,16 @@ private:
 	lift_t *lift;
 };
 
+//检查电梯在一层的等待时间是否达到了return_waiting_floor_tick
+class event_check_timeout:public event_t
+{
+public:
+	event_check_timeout(uint64_t time,lift_t *which_lift);
+	void call()const override;
+private:
+	lift_t *lift;
+};
+
 //电梯
 //电梯的移动策略：
 //1. 向一个方向移动，在每个途径的目标楼层开门，如果目标楼层墙上的按钮与m_direction一致，则将其熄灭，
@@ -132,6 +142,7 @@ private:
 	//2 -> 1 lift_up_last_extra_tick
 	//1 -> 2 lift_up_first_extra_tick
 	int16_t m_direction=0;
+	uint64_t m_begin_static_time=0;//开始处在静止状态的时刻
 	double m_carrying_weight=0;//载的乘客的质量
 	uint64_t m_pressed_button=0;//按下的楼层按钮
 	uint64_t m_called_down_floor=0,m_called_up_floor=0;//呼叫电梯的楼层

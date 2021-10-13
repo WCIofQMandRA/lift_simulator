@@ -241,6 +241,8 @@ void event_check_lift_state::call()const
 		else
 		{
 			lift->m_direction=0;
+			lift->m_begin_static_time=time;
+			event_queue.push<event_check_lift_state>(time,lift);
 		}
 	}
 	else if(lift->m_direction==1)
@@ -298,12 +300,69 @@ void event_check_lift_state::call()const
 		else
 		{
 			lift->m_direction=0;
+			lift->m_begin_static_time=time;
+			event_queue.push<event_check_lift_state>(time,lift);
 		}
 	}
 	else
 	{
 		assert(lift->m_direction==0);
-		
+		assert(lift->m_pressed_button==0);
+		assert(fabs(lift->m_carrying_weight)<1e-6);
+		//本层楼有人呼叫电梯
+		if(lift->is_called_down())
+		{
+			lift->m_waiting_floor=-1;
+			if(!lift->is_called_up()||rand_between(0,1))
+				lift->m_direction=-1;
+			else lift->m_direction=1;
+			event_queue.push<event_check_lift_state>(time,lift);
+		}
+		else if(lift->is_called_up())
+		{
+			lift->m_waiting_floor=-1;
+			lift->m_direction=1;
+			event_queue.push<event_check_lift_state>(time,lift);
+		}
+		//下方的楼层有人呼叫电梯
+		else if(lift->is_called_down_lower()||lift->is_called_up_lower())
+		{
+			lift->m_waiting_floor=-1;
+			if(!(lift->is_called_down_upper()||lift->is_called_up_upper())||rand_between(0,1))
+				event_queue.push<event_change_direction>(time+constant::lift_down_first_extra_tick,lift,-2);
+			else event_queue.push<event_change_direction>(time+constant::lift_up_first_extra_tick,lift,2);
+		}
+		//上方的楼层有人呼叫电梯
+		else if(lift->is_called_down_upper()||lift->is_called_up_upper())
+		{
+			lift->m_waiting_floor=-1;
+			event_queue.push<event_change_direction>(time+constant::lift_up_first_extra_tick,lift,2);
+		}
+		else if(lift->m_waiting_floor==-1)
+		{
+			if(lift->m_begin_static_time+constant::return_waiting_floor_tick<=time)
+			{
+				auto another_lift=&variable::lifts[1-lift->m_liftID];
+				switch (another_lift->m_waiting_floor)
+				{
+				case 0:lift->m_waiting_floor=1;break;
+				case 1:lift->m_waiting_floor=0;break;
+				default:
+				{
+					auto d0=std::abs(lift->m_floor-constant::waiting_floor[0]);
+					auto d1=std::abs(lift->m_floor-constant::waiting_floor[1]);
+					//优先在waiting_floor[0]层等待
+					lift->m_waiting_floor=d0<=d1?0:1;
+				}
+				}
+				if(lift->m_waiting_floor<lift->m_floor)
+					event_queue.push<event_change_direction>(time+constant::lift_down_first_extra_tick,lift,-2);
+				else if(lift->m_waiting_floor>lift->m_floor)
+					event_queue.push<event_change_direction>(time+constant::lift_up_first_extra_tick,lift,2);
+				//否则电梯已位于待命楼层
+			}
+			else event_queue.push<event_check_timeout>(lift->m_begin_static_time+constant::return_waiting_floor_tick,lift);
+		}
 	}
 }
 

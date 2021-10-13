@@ -36,7 +36,7 @@ constexpr uint64_t min_take_lift_down=5;//下楼时，选择乘坐电梯的最�
 constexpr uint64_t press_button_tick=10;//乘客从按下呼叫电梯的按钮的耗时
 
 constexpr int16_t max_floor=12,min_floor=0,base_floor=1;
-constexpr std::array<int16_t,2> waiting_floor={1,7};//待命楼层
+constexpr std::array<int16_t,2> waiting_floor={1,7};//待命楼层, 按优先级从高到低排序
 constexpr std::pair<double,double> passenger_weight_range={40,80};//乘客质量
 #ifdef NDEBUG
 constexpr std::pair<int,int> passenger_number_range={2800,4000};//一天进出楼的人数
