@@ -14,7 +14,9 @@ passenger_t passenger_t::generate(int16_t from,uint64_t appear_time)
 {
 	using namespace constant;
 	if(from<=base_floor)
-		return {from,rand_between<int16_t>(base_floor+1,max_floor),PID++,rand_between(passenger_weight_range),appear_time};
+		return {from,rand_between<int16_t>(base_floor+1,max_floor),PID++,
+			rand_between(passenger_weight_range),appear_time,0,0};
 	else
-		return {from,rand_between<int>(0,2)?rand_between(min_floor,base_floor):base_floor,PID++,rand_between(passenger_weight_range),appear_time};
+		return {from,rand_between<int>(0,2)?rand_between(min_floor,base_floor):base_floor,PID++,
+		rand_between(passenger_weight_range),appear_time,0,0};
 }

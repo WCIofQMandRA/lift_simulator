@@ -22,7 +22,6 @@ public:
 	}
 };
 zzc::priority_queue<passenger_t,compare_passenger> passengers_to_appear;
-}
 
 //生成乘客
 void generate_passengers()
@@ -39,14 +38,38 @@ void generate_passengers()
 	}
 }
 
+//把新出现的乘客放入等待乘梯队列
+void add_new_passenger_to_waiting_queue()
+{
+	for(auto top=passengers_to_appear.top();top.appear_time==variable::current_tick;
+		passengers_to_appear.pop(),top=passengers_to_appear.top())
+	{
+		if(top.destination<top.source)
+		{
+			top.tolerence_time=static_cast<uint64_t>
+				(rand_between(constant::tolerance_tick_rate_range)*(top.source-top.destination)+0.5);
+			variable::waiting_queues_down[top.source].push(top);
+		}
+		else
+		{
+			top.tolerence_time=static_cast<uint64_t>
+				(rand_between(constant::tolerance_tick_rate_range)*(top.destination-top.source)+0.5);
+			variable::waiting_queues_up[top.source].push(top);
+		}
+	}
+}
+
+}//namespace
+
 int main([[maybe_unused]]int argc,[[maybe_unused]]char **argv)
 {
 	rand_engine.seed(std::random_device()());
 	generate_passengers();
 	using namespace variable;
-	for(current_tick=0;current_tick<24*864000;++current_tick)
+	for(current_tick=0;current_tick<864000;++current_tick)
 	{
-
+		add_new_passenger_to_waiting_queue();
+		
 	}
 	return 0;
 }
