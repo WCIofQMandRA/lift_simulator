@@ -243,6 +243,68 @@ void event_check_lift_state::call()const
 			lift->m_direction=0;
 		}
 	}
+	else if(lift->m_direction==1)
+	{
+		assert(lift->m_waiting_floor==-1);
+		if(lift->m_is_door_open)
+		{
+			if(lift->m_passengers[lift->m_floor].size())
+				event_queue.push<event_passenger_out>(time+rand_between(constant::iolift_tick_range),lift);
+			else if(variable::waiting_queues_up[lift->m_floor].size())
+			{
+				auto &pass=variable::waiting_queues_up[lift->m_floor].front();
+				//乘客已等待超时
+				if(pass.appear_time+pass.tolerance_time<time)
+				{
+					event_queue.push<event_passenger_walk>(pass.appear_time+pass.tolerance_time,pass);
+					variable::waiting_queues_up[lift->m_floor].pop();
+				}
+				//电梯没有满员
+				else if(lift->m_carrying_weight<constant::full_weight)
+					event_queue.push<event_passenger_in>(time+rand_between(constant::iolift_tick_range),lift);
+				else
+				{
+					//电梯满员：电梯关门、乘客重新呼叫电梯
+					event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,false);
+					event_queue.push<event_press_wbutton>(time+constant::press_button_tick,1,lift->m_floor);
+				}
+			}
+			//没有人需要进出
+			//TODO:在电梯内有人时会按关门键，否则等待auto_close_door_tick再关门
+			else event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,false);
+		}
+		//需要在当前楼层开门
+		else if(bool called_up=lift->is_called_up(),pressed=lift->is_pressed();
+			!lift->m_is_door_open&&(called_up||pressed))
+		{
+			//如果电梯因呼叫而减速到1，则其不可能满员
+			assert(pressed||lift->m_carrying_weight<constant::full_weight);
+			//熄灭按钮
+			variable::wall_buttons.switch_off_up(time,lift->m_floor);
+			lift->remove_pressed_button();
+			event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,true);
+		}
+		//需要继续上升，并在顶上的楼层开门
+		else if(lift->is_called_down_upper()||lift->is_called_up_upper()||
+			lift->is_pressed_upper())
+		{
+			event_queue.push<event_change_direction>(time+constant::lift_up_first_extra_tick,lift,2);
+		}
+		else if(lift->is_called_down_lower()||lift->is_called_up_lower()||
+			lift->is_pressed_lower())
+		{
+			event_queue.push<event_change_direction>(time+constant::lift_down_first_extra_tick,lift,-2);
+		}
+		else
+		{
+			lift->m_direction=0;
+		}
+	}
+	else
+	{
+		assert(lift->m_direction==0);
+		
+	}
 }
 
 event_arrive_at::event_arrive_at(uint64_t time,lift_t *which_lift,int16_t floor):
