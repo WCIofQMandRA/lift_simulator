@@ -7,12 +7,6 @@
 #include "random.hpp"
 #include "cassert"
 
-namespace
-{
-template<typename T>
-T lowbit(T x){return x&-x;}
-}
-
 /////////////////////////////////////
 //lift_t
 /////////////////////////////////////
@@ -28,6 +22,63 @@ void lift_t::add_called_down_floor(uint64_t time,int16_t floor)
 	m_called_down_floor|=(uint64_t)1<<(floor-constant::min_floor);
 	m_waiting_floor=-1;
 	variable::event_queue.push<event_check_lift_state>(time,this);
+}
+
+void lift_t::add_pressed_button(uint64_t time,int16_t floor)
+{
+	m_pressed_button|=(uint64_t)1<<(floor-constant::min_floor);
+	m_waiting_floor=-1;
+	variable::event_queue.push<event_check_lift_state>(time,this);
+}
+
+void lift_t::remove_called_up_floor()
+{
+	m_called_up_floor&=~((uint64_t)1<<(m_floor-constant::min_floor));
+}
+void lift_t::remove_called_down_floor()
+{
+	m_called_down_floor&=~((uint64_t)1<<(m_floor-constant::min_floor));
+}
+void lift_t::remove_pressed_button()
+{
+	m_pressed_button&=~((uint64_t)1<<(m_floor-constant::min_floor));
+}
+bool lift_t::is_pressed()
+{
+	return m_pressed_button&((uint64_t)1<<(m_floor-constant::min_floor));
+}
+bool lift_t::is_pressed_lower()
+{
+	//避免出现左移64位（此时实际左移了64mod64=0位）
+	return m_floor!=constant::min_floor&&m_pressed_button<<(64-(m_floor-constant::min_floor))!=0;
+}
+bool lift_t::is_pressed_upper()
+{
+	return m_pressed_button>>(m_floor-constant::min_floor+1)!=0;
+}
+bool lift_t::is_called_up()
+{
+	return m_called_up_floor&((uint64_t)1<<(m_floor-constant::min_floor));
+}
+bool lift_t::is_called_up_lower()
+{
+	return m_floor!=constant::min_floor&&m_called_up_floor<<(64-(m_floor-constant::min_floor))!=0;
+}
+bool lift_t::is_called_up_upper()
+{
+	return m_called_up_floor>>(m_floor-constant::min_floor+1)!=0;
+}
+bool lift_t::is_called_down()
+{
+	return m_called_down_floor&((uint64_t)1<<(m_floor-constant::min_floor));
+}
+bool lift_t::is_called_down_lower()
+{
+	return m_floor!=constant::min_floor&&m_called_down_floor<<(64-(m_floor-constant::min_floor))!=0;
+}
+bool lift_t::is_called_down_upper()
+{
+	return m_called_down_floor>>(m_floor-constant::min_floor+1)!=0;
 }
 
 uint64_t lift_t::move_to_time(int16_t floor)
@@ -75,6 +126,15 @@ void wbutton_t::press_down(uint64_t time,int16_t floor)
 			lifts[0].add_called_down_floor(time,floor);
 		else lifts[1].add_called_down_floor(time,floor);
 	}
+}
+
+void wbutton_t::switch_off_up(int16_t floor)
+{
+	m_up_pressed&=~((uint64_t)1<<(floor-constant::min_floor));
+}
+void wbutton_t::switch_off_down(int16_t floor)
+{
+	m_down_pressed&=~((uint64_t)1<<(floor-constant::min_floor));
 }
 
 //////////////////////////////////////////
@@ -223,7 +283,7 @@ void event_check_lift_state::call()const
 			//如果电梯因呼叫而减速到-1，则其不可能满员
 			assert(pressed||lift->m_carrying_weight<constant::full_weight);
 			//熄灭按钮
-			variable::wall_buttons.switch_off_down(time,lift->m_floor);
+			variable::wall_buttons.switch_off_down(lift->m_floor);
 			lift->remove_pressed_button();
 			event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,true);
 		}
@@ -282,7 +342,7 @@ void event_check_lift_state::call()const
 			//如果电梯因呼叫而减速到1，则其不可能满员
 			assert(pressed||lift->m_carrying_weight<constant::full_weight);
 			//熄灭按钮
-			variable::wall_buttons.switch_off_up(time,lift->m_floor);
+			variable::wall_buttons.switch_off_up(lift->m_floor);
 			lift->remove_pressed_button();
 			event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,true);
 		}
@@ -395,4 +455,28 @@ void event_open_door::call()const
 {
 	lift->m_is_door_open=open;
 	variable::event_queue.push<event_check_lift_state>(time,lift);
+}
+
+event_passenger_out::event_passenger_out(uint64_t time,lift_t *which_lift):
+	event_t(time,"乘客出电梯","passengerio"+std::to_string(which_lift->m_liftID)),lift(which_lift){}
+
+void event_passenger_out::call()const
+{
+	//TODO
+}
+
+event_passenger_in::event_passenger_in(uint64_t time,lift_t *which_lift):
+	event_t(time,"乘客进电梯","passengerio"+std::to_string(which_lift->m_liftID)),lift(which_lift){}
+
+void event_passenger_in::call()const
+{
+	//TODO
+}
+
+event_check_timeout::event_check_timeout(uint64_t time,lift_t *which_lift):
+	event_t(time,""),lift(which_lift){}
+
+void event_check_timeout::call()const
+{
+	//TODO
 }

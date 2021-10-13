@@ -87,6 +87,7 @@ class event_check_timeout:public event_t
 public:
 	event_check_timeout(uint64_t time,lift_t *which_lift);
 	void call()const override;
+	bool print(std::ostream&)const override{return false;}
 private:
 	lift_t *lift;
 };
@@ -102,7 +103,8 @@ class lift_t
 {
 public:
 	friend class wbutton_t;
-	ADD_FRIEND(check_lift_state,arrive_at,change_direction,open_door);
+	ADD_FRIEND(check_lift_state,arrive_at,change_direction,open_door,
+		passenger_out,passenger_in,check_timeout);
 	lift_t(int16_t ID):m_liftID(ID){}
 	lift_t(const lift_t&)=delete;
 	void press_floor(uint64_t time,int16_t floor);//按楼层键
@@ -176,8 +178,8 @@ public:
 	void press_down(uint64_t time,int16_t floor);
 private:
 	//关闭向上的按钮，同时取消电梯的被呼叫状态
-	void switch_off_up(uint64_t time,int16_t floor);
-	void switch_off_down(uint64_t time,int16_t floor);
+	void switch_off_up(int16_t floor);
+	void switch_off_down(int16_t floor);
 private:
 	uint64_t m_up_pressed;//向上的按钮被按下
 	uint64_t m_down_pressed;//向下的按钮被按下

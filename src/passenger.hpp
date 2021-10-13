@@ -32,7 +32,7 @@ private:
 class event_passenger_walk:public event_t
 {
 public:
-	event_passenger_walk(uint64_t time,passenger_t passenger);
+	event_passenger_walk(uint64_t time,const passenger_t &passenger);
 	void call()const override;
 	bool print(std::ostream &)const override;
 private:

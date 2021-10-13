@@ -56,3 +56,18 @@ bool event_passenger_appear::print(std::ostream &os)const
 	os<<"#"<<passenger.ID<<", "<<passenger.source<<"->"<<passenger.destination<<", "<<passenger.weight<<"kg\n";
 	return true;
 }
+
+event_passenger_walk::event_passenger_walk(uint64_t time,const passenger_t &passenger):
+	event_t(time,"乘客放弃等待"),passenger(passenger){}
+
+void event_passenger_walk::call()const
+{
+	//TODO
+}
+
+bool event_passenger_walk::print(std::ostream &os)const
+{
+	event_t::print(os);
+	os<<"#"<<passenger.ID<<", "<<passenger.source<<"->"<<passenger.destination<<", "<<passenger.weight<<"kg\n";
+	return true;
+}
