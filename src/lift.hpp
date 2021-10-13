@@ -4,6 +4,7 @@
 #pragma once
 #include <cstdint>
 #include "event_queue.hpp"
+#include "passenger.hpp"
 #include "preprocessor.h"
 
 #define ADD_FRIEND_IMPL(x) friend class event_##x
@@ -58,6 +59,27 @@ private:
 	bool open;
 };
 
+//乘客出电梯
+//乘客严格先下后上
+class event_passenger_out:public event_t
+{
+public:
+	event_passenger_out(uint64_t time,lift_t *which_lift);
+	void call()const override;
+private:
+	lift_t *lift;
+};
+
+//乘客进电梯
+class event_passenger_in:public event_t
+{
+public:
+	event_passenger_in(uint64_t time,lift_t *which_lift);
+	void call()const override;
+private:
+	lift_t *lift;
+};
+
 //电梯
 //电梯的移动策略：
 //1. 向一个方向移动，在每个途径的目标楼层开门，如果目标楼层墙上的按钮与m_direction一致，则将其熄灭，
@@ -96,7 +118,8 @@ private:
 	void move_to(uint64_t time,int16_t floor);//移动到指定楼层
 	void check_state(uint64_t time);//检查状态
 private:
-	bool m_is_door_open=false;//是否开门
+	//TODO: 引入正在开门/关门的状态
+	bool m_is_door_open=false,m_passenger_ioing=false;//是否开门, 乘客是否正在上下电梯
 	//若电梯正在返回或已经位于待命层，则为0/1，否则为-1
 	//电梯的待命层为waiting_floor[m_waiting_floor]
 	int16_t m_waiting_floor=-1;
@@ -108,12 +131,11 @@ private:
 	//-1 -> -2 lift_down_first_extra_tick
 	//2 -> 1 lift_up_last_extra_tick
 	//1 -> 2 lift_up_first_extra_tick
-	//±2 <-> 其他 不允许
-	//其他 无耗时
 	int16_t m_direction=0;
 	double m_carrying_weight=0;//载的乘客的质量
 	uint64_t m_pressed_button=0;//按下的楼层按钮
 	uint64_t m_called_down_floor=0,m_called_up_floor=0;//呼叫电梯的楼层
+	std::array<zzc::queue<passenger_t>,constant::max_floor-constant::min_floor+1> m_passengers;//电梯内的乘客
 };
 
 //按下墙上的按钮
@@ -137,10 +159,12 @@ public:
 	wbutton_t(const wbutton_t&)=delete;
 	bool is_up_pressed(int16_t floor)const;
 	bool is_down_pressed(int16_t floor)const;
+	//按下按钮↑，同时呼叫电梯
 	void press_up(uint64_t time,int16_t floor);
 	void press_down(uint64_t time,int16_t floor);
 private:
-	void switch_off_up(uint64_t time,int16_t floor);//关闭向上的按钮
+	//关闭向上的按钮，同时取消电梯的被呼叫状态
+	void switch_off_up(uint64_t time,int16_t floor);
 	void switch_off_down(uint64_t time,int16_t floor);
 private:
 	uint64_t m_up_pressed;//向上的按钮被按下

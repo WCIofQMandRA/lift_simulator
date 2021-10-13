@@ -105,38 +105,41 @@ void event_check_lift_state::call()const
 	if(lift->m_direction==-2)
 	{
 		//需要在当前楼层开门——减速
-		if(lift->is_called_down()||lift->is_pressed())
+		if(lift->is_called_down()&&lift->m_carrying_weight<constant::full_weight
+			||lift->is_pressed())
 		{
-			assert(lift->m_waiting_floor==-1);
+			lift->m_waiting_floor=-1;
 			event_queue.push<event_change_direction>(time+constant::lift_down_last_extra_tick,lift,-1);
 		}
 		//需要继续下降，并在底下的楼层开门
 		else if(lift->is_called_down_lower()||lift->is_called_up_lower()||
 			lift->is_pressed_lower())
 		{
-			assert(lift->m_waiting_floor==-1);
+			lift->m_waiting_floor=-1;
 			event_queue.push<event_arrive_at>(time+constant::lift_down_tick,lift,lift->m_floor-1);
 		}
 		//本层有人按↑
 		else if(lift->is_called_up())
 		{
-			event_queue.push<event_change_direction>(time+constant::lift_down_last_extra_tick,lift,-1);
+			lift->m_waiting_floor=-1;
+			event_queue.push<event_change_direction>(time+constant::lift_down_last_extra_tick,lift,1);
 		}
 		//上方有人呼叫电梯，需要先减速
 		else if(lift->is_called_up_upper()||lift->is_called_down_upper())
 		{
 			assert(lift->m_waiting_floor!=-1);
+			lift->m_waiting_floor=-1;
 			//FIXME: constants.h中已指出，lift_down_last_extra_tick并不完全是由减速
 			//引起的，其中还包含了开门的准备时间，而此时，电梯的减速并不是为开门做准备，所以
 			//lift_down_last_extra_tick长于实际用时
-			event_queue.push<event_change_direction>(time+constant::lift_down_last_extra_tick,lift,-1);
+			event_queue.push<event_change_direction>(time+constant::lift_down_last_extra_tick,lift,1);
 		}
 		//没有人呼叫电梯并且电梯正在返回待命层
 		else if(lift->m_waiting_floor!=-1)
 		{
 			assert(constant::waiting_floor[lift->m_waiting_floor]<=lift->m_floor);
 			if(constant::waiting_floor[lift->m_waiting_floor]==lift->m_floor)
-				event_queue.push<event_change_direction>(time+constant::lift_down_last_extra_tick,lift,-1);
+				event_queue.push<event_change_direction>(time+constant::lift_down_last_extra_tick,lift,0);
 			else
 				event_queue.push<event_arrive_at>(time+constant::lift_down_tick,lift,lift->m_floor-1);
 		}
@@ -145,36 +148,39 @@ void event_check_lift_state::call()const
 	else if(lift->m_direction==2)
 	{
 		//需要在当前楼层开门——减速
-		if(lift->is_called_up()||lift->is_pressed())
+		if(lift->is_called_up()&&lift->m_carrying_weight<constant::full_weight
+			||lift->is_pressed())
 		{
-			assert(lift->m_waiting_floor==-1);
+			lift->m_waiting_floor=-1;
 			event_queue.push<event_change_direction>(time+constant::lift_up_last_extra_tick,lift,1);
 		}
 		//需要继续上升，并在顶上的楼层开门
 		else if(lift->is_called_down_upper()||lift->is_called_up_upper()||
 			lift->is_pressed_upper())
 		{
-			assert(lift->m_waiting_floor==-1);
+			lift->m_waiting_floor=-1;
 			event_queue.push<event_arrive_at>(time+constant::lift_up_tick,lift,lift->m_floor+1);
 		}
 		//本层有人按↓
 		else if(lift->is_called_down())
 		{
-			event_queue.push<event_change_direction>(time+constant::lift_down_last_extra_tick,lift,-1);
+			lift->m_waiting_floor=-1;
+			event_queue.push<event_change_direction>(time+constant::lift_up_last_extra_tick,lift,-1);
 		}
 		//下方有人呼叫电梯，需要先减速
 		else if(lift->is_called_up_lower()||lift->is_called_down_lower()||lift->is_called_down())
 		{
 			assert(lift->m_waiting_floor!=-1);
+			lift->m_waiting_floor=-1;
 			//FIXME
-			event_queue.push<event_change_direction>(time+constant::lift_up_last_extra_tick,lift,1);
+			event_queue.push<event_change_direction>(time+constant::lift_up_last_extra_tick,lift,-1);
 		}
 		//没有人呼叫电梯并且电梯正在返回待命层
 		else if(lift->m_waiting_floor!=-1)
 		{
 			assert(constant::waiting_floor[lift->m_waiting_floor]>=lift->m_floor);
 			if(constant::waiting_floor[lift->m_waiting_floor]==lift->m_floor)
-				event_queue.push<event_change_direction>(time+constant::lift_up_last_extra_tick,lift,1);
+				event_queue.push<event_change_direction>(time+constant::lift_up_last_extra_tick,lift,0);
 			else
 				event_queue.push<event_arrive_at>(time+constant::lift_up_tick,lift,lift->m_floor+1);
 		}
@@ -182,22 +188,59 @@ void event_check_lift_state::call()const
 	}
 	else if(lift->m_direction==-1)
 	{
-		//需要在当前楼层开门——开门
-		if(lift->is_called_down()||lift->is_pressed())
+		assert(lift->m_waiting_floor==-1);
+		if(lift->m_is_door_open)
 		{
-			assert(lift->m_waiting_floor==-1);
+			if(lift->m_passengers[lift->m_floor].size())
+				event_queue.push<event_passenger_out>(time+rand_between(constant::iolift_tick_range),lift);
+			else if(variable::waiting_queues_down[lift->m_floor].size())
+			{
+				auto &pass=variable::waiting_queues_down[lift->m_floor].front();
+				//乘客已等待超时
+				if(pass.appear_time+pass.tolerance_time<time)
+				{
+					event_queue.push<event_passenger_walk>(pass.appear_time+pass.tolerance_time,pass);
+					variable::waiting_queues_down[lift->m_floor].pop();
+				}
+				//电梯没有满员
+				else if(lift->m_carrying_weight<constant::full_weight)
+					event_queue.push<event_passenger_in>(time+rand_between(constant::iolift_tick_range),lift);
+				else
+				{
+					//电梯满员：电梯关门、乘客重新呼叫电梯
+					event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,false);
+					event_queue.push<event_press_wbutton>(time+constant::press_button_tick,-1,lift->m_floor);
+				}
+			}
+			//没有人需要进出
+			//TODO:在电梯内有人时会按关门键，否则等待auto_close_door_tick再关门
+			else event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,false);
+		}
+		//需要在当前楼层开门
+		else if(bool called_down=lift->is_called_down(),pressed=lift->is_pressed();
+			!lift->m_is_door_open&&(called_down||pressed))
+		{
+			//如果电梯因呼叫而减速到-1，则其不可能满员
+			assert(pressed||lift->m_carrying_weight<constant::full_weight);
+			//熄灭按钮
 			variable::wall_buttons.switch_off_down(time,lift->m_floor);
-			lift->remove_called_down_floor();
 			lift->remove_pressed_button();
-			//可能乘客会在电梯已经开门时到达
-			if(!lift->m_is_door_open)
-				event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,true);
+			event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,true);
 		}
 		//需要继续下降，并在底下的楼层开门
 		else if(lift->is_called_down_lower()||lift->is_called_up_lower()||
 			lift->is_pressed_lower())
 		{
-			
+			event_queue.push<event_change_direction>(time+constant::lift_down_first_extra_tick,lift,-2);
+		}
+		else if(lift->is_called_down_upper()||lift->is_called_up_upper()||
+			lift->is_pressed_upper())
+		{
+			event_queue.push<event_change_direction>(time+constant::lift_up_first_extra_tick,lift,2);
+		}
+		else
+		{
+			lift->m_direction=0;
 		}
 	}
 }
