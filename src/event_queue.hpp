@@ -47,8 +47,9 @@ public:
 	}
 	void call_and_pop()
 	{
-		qu.top()->call();
+		//先erase再call,这样在call中就可以加入相同的事件
 		event_happening.erase(qu.top()->signature);
+		qu.top()->call();
 		qu.pop();
 	}
 	bool print(std::ostream &os)
