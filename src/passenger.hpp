@@ -38,3 +38,15 @@ public:
 private:
 	passenger_t passenger;
 };
+
+//乘客到达
+class event_passenger_arrive:public event_t
+{
+public:
+	event_passenger_arrive(const passenger_t &passenger,bool taking_lift);
+	void call(std::ostream &os=std::cout)const override;
+	bool print(std::ostream &os=std::cout)const override;
+private:
+	passenger_t passenger;
+	bool taking_lift;
+};

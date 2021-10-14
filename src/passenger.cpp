@@ -62,12 +62,32 @@ event_passenger_walk::event_passenger_walk(uint64_t time,const passenger_t &pass
 
 void event_passenger_walk::call(std::ostream &)const
 {
-	//TODO
+	auto pass2=passenger;
+	pass2.arrive_time=time;
+	variable::event_queue.push<event_passenger_arrive>(pass2,false);
 }
 
 bool event_passenger_walk::print(std::ostream &os)const
 {
 	event_t::print(os);
 	os<<"#"<<passenger.ID<<", "<<passenger.source<<"->"<<passenger.destination<<", "<<passenger.weight<<"kg\n";
+	return true;
+}
+
+event_passenger_arrive::event_passenger_arrive(const passenger_t &passenger,bool taking_lift):
+	event_t(passenger.arrive_time,"乘客到达"),passenger(passenger),taking_lift(taking_lift){}
+
+void event_passenger_arrive::call(std::ostream &)const
+{
+	//TODO: 统计一天中的乘客
+}
+
+bool event_passenger_arrive::print(std::ostream &os)const
+{
+	event_t::print(os);
+	os<<"#"<<passenger.ID<<", "<<passenger.source<<"->"<<passenger.destination<<", "<<passenger.weight<<"kg\n";
+	output_time(os<<"出发时间: ",passenger.appear_time)<<"\n";
+	output_time(os<<"到达时间: ",passenger.arrive_time)<<"\n";
+	os<<(taking_lift?"(乘坐电梯)\n":"(走楼梯)\n");
 	return true;
 }

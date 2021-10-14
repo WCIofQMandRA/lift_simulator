@@ -75,10 +75,11 @@ private:
 class event_passenger_in:public event_t
 {
 public:
-	event_passenger_in(uint64_t time,lift_t *which_lift);
+	event_passenger_in(uint64_t time,lift_t *which_lift,int16_t dire);
 	void call(std::ostream &os=std::cout)const override;
 private:
 	lift_t *lift;
+	int16_t dire;
 };
 
 //检查电梯在一层的等待时间是否达到了return_waiting_floor_tick

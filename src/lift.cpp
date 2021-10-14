@@ -276,7 +276,7 @@ void event_check_lift_state::call(std::ostream&)const
 				}
 				//电梯没有满员
 				else if(lift->m_carrying_weight<constant::full_weight)
-					event_queue.push<event_passenger_in>(time+rand_between(constant::iolift_tick_range),lift);
+					event_queue.push<event_passenger_in>(time+rand_between(constant::iolift_tick_range),lift,-1);
 				else
 				{
 					//电梯满员：电梯关门、乘客重新呼叫电梯
@@ -335,7 +335,7 @@ void event_check_lift_state::call(std::ostream&)const
 				}
 				//电梯没有满员
 				else if(lift->m_carrying_weight<constant::full_weight)
-					event_queue.push<event_passenger_in>(time+rand_between(constant::iolift_tick_range),lift);
+					event_queue.push<event_passenger_in>(time+rand_between(constant::iolift_tick_range),lift,1);
 				else
 				{
 					//电梯满员：电梯关门、乘客重新呼叫电梯
@@ -473,18 +473,43 @@ event_passenger_out::event_passenger_out(uint64_t time,lift_t *which_lift):
 	event_t(time,"乘客出电梯 #"+std::to_string(which_lift->m_liftID),
 	"passengerio"+std::to_string(which_lift->m_liftID)),lift(which_lift){}
 
-void event_passenger_out::call(std::ostream&)const
+void event_passenger_out::call(std::ostream &os)const
 {
-	//TODO
+	auto pass=lift->m_passengers[lift->m_floor-constant::min_floor].front();
+	lift->m_passengers[lift->m_floor-constant::min_floor].pop();
+	lift->m_carrying_weight-=pass.weight;
+	os<<"乘客信息: #"<<pass.ID<<", "<<pass.source<<"->"<<pass.destination<<", "<<pass.weight<<"kg\n";
+	pass.arrive_time=time;
+	variable::event_queue.push<event_passenger_arrive>(pass,true);
+	variable::event_queue.push<event_check_lift_state>(time,lift);
 }
 
-event_passenger_in::event_passenger_in(uint64_t time,lift_t *which_lift):
+event_passenger_in::event_passenger_in(uint64_t time,lift_t *which_lift,int16_t dire):
 	event_t(time,"乘客进电梯 #"+std::to_string(which_lift->m_liftID),
-	"passengerio"+std::to_string(which_lift->m_liftID)),lift(which_lift){}
+	"passengerio"+std::to_string(which_lift->m_liftID)),lift(which_lift),dire(dire){}
 
-void event_passenger_in::call(std::ostream&)const
+void event_passenger_in::call(std::ostream &os)const
 {
-	//TODO
+	if(dire>0)
+	{
+		auto &pass=variable::waiting_queues_up[lift->m_floor-constant::min_floor].front();
+		os<<"乘客信息: #"<<pass.ID<<", "<<pass.source<<"->"<<pass.destination<<", "<<pass.weight<<"kg\n";
+		lift->m_carrying_weight+=pass.weight;
+		lift->m_passengers[pass.destination-constant::min_floor].push(pass);
+		//把乘客按电梯内的楼层按钮的时间也算在进入电梯的时间中，故直接用time
+		lift->add_pressed_button(time,pass.destination);
+		variable::waiting_queues_up[lift->m_floor].pop();
+	}
+	else
+	{
+		auto &pass=variable::waiting_queues_down[lift->m_floor-constant::min_floor].front();
+		os<<"乘客信息: #"<<pass.ID<<", "<<pass.source<<"->"<<pass.destination<<", "<<pass.weight<<"kg\n";
+		lift->m_carrying_weight+=pass.weight;
+		lift->m_passengers[pass.destination-constant::min_floor].push(pass);
+		lift->add_pressed_button(time,pass.destination);
+		variable::waiting_queues_down[lift->m_floor].pop();
+	}
+	variable::event_queue.push<event_check_lift_state>(time,lift);
 }
 
 event_check_timeout::event_check_timeout(uint64_t time,lift_t *which_lift):
@@ -492,5 +517,11 @@ event_check_timeout::event_check_timeout(uint64_t time,lift_t *which_lift):
 
 void event_check_timeout::call(std::ostream&)const
 {
-	//TODO
+	if(lift->m_direction==0&&lift->m_begin_static_time+constant::return_waiting_floor_tick<=time)
+	{
+		assert(lift->m_called_down_floor==0);
+		assert(lift->m_called_up_floor==0);
+		assert(lift->m_pressed_button==0);
+		variable::event_queue.push<event_check_lift_state>(time,lift);
+	}
 }
