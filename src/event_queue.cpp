@@ -10,24 +10,24 @@ event_t::event_t(uint64_t time,const std::string &name,const std::string &sign):
 
 bool event_t::print(std::ostream &os)const
 {
-	output_time(os)<<"\t"<<name<<"\n";
+	output_time(os<<"[",time)<<"]\t"<<name<<"\n";
 	return true;
 }
 
-std::ostream& event_t::output_time(std::ostream &os)const
+std::ostream& event_t::output_time(std::ostream &os,uint64_t time)const
 {
-	char t[]="[hh:mm:ss.s]";
-	auto h=this->time;
+	char t[]="hh:mm:ss.s";
+	auto h=time;
 	auto s=h%600;h/=600;
 	auto m=h%60;h/=60;
-	t[1]=static_cast<char>(h/10+48);
-	t[2]=static_cast<char>(h%10+48);
-	t[4]=static_cast<char>(m/10+48);
-	t[5]=static_cast<char>(m%10+48);
-	t[10]=static_cast<char>(s%10+48);
+	t[0]=static_cast<char>(h/10+48);
+	t[1]=static_cast<char>(h%10+48);
+	t[3]=static_cast<char>(m/10+48);
+	t[4]=static_cast<char>(m%10+48);
+	t[9]=static_cast<char>(s%10+48);
 	s/=10;
-	t[7]=static_cast<char>(s/10+48);
-	t[8]=static_cast<char>(s%10+48);
+	t[6]=static_cast<char>(s/10+48);
+	t[7]=static_cast<char>(s%10+48);
 	return os<<t;
 }
 

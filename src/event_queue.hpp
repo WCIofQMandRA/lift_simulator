@@ -27,7 +27,7 @@ public:
 	//事实上，除了event_passenger_appear外，所有事件在加入event_queue时开始发送
 	std::string signature;
 protected:
-	std::ostream& output_time(std::ostream &)const;	//以[hh:mm:ss]的格式输出时间
+	std::ostream& output_time(std::ostream &,uint64_t)const;	//以[hh:mm:ss]的格式输出时间
 private:
 	static uint64_t event_order;
 };
