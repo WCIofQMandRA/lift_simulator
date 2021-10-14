@@ -33,7 +33,7 @@ passenger_t passenger_t::generate(int16_t from,uint64_t appear_time)
 event_passenger_appear::event_passenger_appear(uint64_t time,int16_t src):
 	event_t(time,"乘客出现"),passenger(passenger_t::generate(src,time)){}
 
-void event_passenger_appear::call()const
+void event_passenger_appear::call(std::ostream &)const
 {
 	using namespace variable;
 	if(passenger.destination>passenger.source)
@@ -60,7 +60,7 @@ bool event_passenger_appear::print(std::ostream &os)const
 event_passenger_walk::event_passenger_walk(uint64_t time,const passenger_t &passenger):
 	event_t(time,"乘客放弃等待"),passenger(passenger){}
 
-void event_passenger_walk::call()const
+void event_passenger_walk::call(std::ostream &)const
 {
 	//TODO
 }

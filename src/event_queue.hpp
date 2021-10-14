@@ -15,8 +15,8 @@ class event_t
 {
 public:
 	event_t(uint64_t time,const std::string &name,const std::string &sign="");
-	virtual void call()const=0;					//完成event需要进行的操作
-	virtual bool print(std::ostream &)const;	//输出操作的情况, 返回是否真的输出了内容
+	virtual void call(std::ostream &os=std::cout)const=0;	//完成event需要进行的操作
+	virtual bool print(std::ostream &os=std::cout)const;	//输出操作的情况, 返回是否真的输出了内容
 	virtual ~event_t()=default;
 	uint64_t time;								//事件发生的时间
 	uint64_t order;								//事件被创建的顺序（用于确定同一时刻的多个事件的处理顺序）
@@ -45,11 +45,11 @@ public:
 		event_happening.insert(new_event->signature);
 		qu.push(std::move(new_event));
 	}
-	void call_and_pop()
+	void call_and_pop(std::ostream &os=std::cout)
 	{
 		//先erase再call,这样在call中就可以加入相同的事件
 		event_happening.erase(qu.top()->signature);
-		qu.top()->call();
+		qu.top()->call(os);
 		qu.pop();
 	}
 	bool print(std::ostream &os)

@@ -158,7 +158,7 @@ event_press_wbutton::event_press_wbutton(uint64_t time,int16_t dire,int16_t floo
 	event_t(time,dire>0?"按下按钮↑":"按下按钮↓",(dire>0?"press_up":"press_down")+std::to_string(floor)),
 	dire(dire),floor(floor){}
 
-void event_press_wbutton::call()const
+void event_press_wbutton::call(std::ostream&)const
 {
 	using variable::wall_buttons;
 	if(dire>0)wall_buttons.press_up(time,floor);
@@ -169,7 +169,7 @@ void event_press_wbutton::call()const
 event_check_lift_state::event_check_lift_state(uint64_t time,lift_t *which_lift):
 	event_t(time,""),lift(which_lift){}
 
-void event_check_lift_state::call()const
+void event_check_lift_state::call(std::ostream&)const
 {
 	//TODO
 	//正在全速下降
@@ -443,7 +443,7 @@ event_arrive_at::event_arrive_at(uint64_t time,lift_t *which_lift,int16_t floor)
 	std::to_string(which_lift->m_liftID)+"arrive_at"+std::to_string(floor)),
 	lift(which_lift),floor(floor){}
 
-void event_arrive_at::call()const
+void event_arrive_at::call(std::ostream&)const
 {
 	lift->m_floor=floor;
 	variable::event_queue.push<event_check_lift_state>(time,lift);
@@ -453,7 +453,7 @@ event_change_direction::event_change_direction(uint64_t time,lift_t *which_lift,
 	event_t(time,"",std::to_string(which_lift->m_liftID)+"change_dire"+std::to_string(dire)),
 	lift(which_lift),dire(dire){}
 
-void event_change_direction::call()const
+void event_change_direction::call(std::ostream&)const
 {
 	lift->m_direction=dire;
 	variable::event_queue.push<event_check_lift_state>(time,lift);
@@ -463,24 +463,26 @@ event_open_door::event_open_door(uint64_t time,lift_t *which_lift,bool open):
 	event_t(time,"电梯 #"+std::to_string(which_lift->m_liftID)+(open?"开门":"关门"),
 	std::to_string(which_lift->m_liftID)+(open?"open_door":"close_door")),lift(which_lift),open(open){}
 
-void event_open_door::call()const
+void event_open_door::call(std::ostream&)const
 {
 	lift->m_is_door_open=open;
 	variable::event_queue.push<event_check_lift_state>(time,lift);
 }
 
 event_passenger_out::event_passenger_out(uint64_t time,lift_t *which_lift):
-	event_t(time,"乘客出电梯","passengerio"+std::to_string(which_lift->m_liftID)),lift(which_lift){}
+	event_t(time,"乘客出电梯 #"+std::to_string(which_lift->m_liftID),
+	"passengerio"+std::to_string(which_lift->m_liftID)),lift(which_lift){}
 
-void event_passenger_out::call()const
+void event_passenger_out::call(std::ostream&)const
 {
 	//TODO
 }
 
 event_passenger_in::event_passenger_in(uint64_t time,lift_t *which_lift):
-	event_t(time,"乘客进电梯","passengerio"+std::to_string(which_lift->m_liftID)),lift(which_lift){}
+	event_t(time,"乘客进电梯 #"+std::to_string(which_lift->m_liftID),
+	"passengerio"+std::to_string(which_lift->m_liftID)),lift(which_lift){}
 
-void event_passenger_in::call()const
+void event_passenger_in::call(std::ostream&)const
 {
 	//TODO
 }
@@ -488,7 +490,7 @@ void event_passenger_in::call()const
 event_check_timeout::event_check_timeout(uint64_t time,lift_t *which_lift):
 	event_t(time,""),lift(which_lift){}
 
-void event_check_timeout::call()const
+void event_check_timeout::call(std::ostream&)const
 {
 	//TODO
 }

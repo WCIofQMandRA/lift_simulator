@@ -20,8 +20,8 @@ class event_check_lift_state:public event_t
 {
 public:
 	event_check_lift_state(uint64_t time,lift_t *which_lift);
-	void call()const override;
-	bool print(std::ostream&)const override{return false;}//不输出
+	void call(std::ostream &os=std::cout)const override;
+	bool print(std::ostream &os=std::cout)const override{(void)os;return false;}//不输出
 private:
 	
 	lift_t *lift;
@@ -32,7 +32,7 @@ class event_arrive_at:public event_t
 {
 public:
 	event_arrive_at(uint64_t time,lift_t *which_lift,int16_t floor);
-	void call()const override;
+	void call(std::ostream &os=std::cout)const override;
 private:
 	lift_t *lift;int16_t floor;
 };
@@ -42,7 +42,7 @@ class event_change_direction:public event_t
 {
 public:
 	event_change_direction(uint64_t time,lift_t *which_lift,int16_t dire);
-	void call()const override;
+	void call(std::ostream &os=std::cout)const override;
 	bool print(std::ostream&)const override{return false;}
 private:
 	lift_t *lift;
@@ -54,7 +54,7 @@ class event_open_door:public event_t
 {
 public:
 	event_open_door(uint64_t time,lift_t *which_lift,bool open);
-	void call()const override;
+	void call(std::ostream &os=std::cout)const override;
 private:
 	lift_t *lift;
 	bool open;
@@ -66,7 +66,7 @@ class event_passenger_out:public event_t
 {
 public:
 	event_passenger_out(uint64_t time,lift_t *which_lift);
-	void call()const override;
+	void call(std::ostream &os=std::cout)const override;
 private:
 	lift_t *lift;
 };
@@ -76,7 +76,7 @@ class event_passenger_in:public event_t
 {
 public:
 	event_passenger_in(uint64_t time,lift_t *which_lift);
-	void call()const override;
+	void call(std::ostream &os=std::cout)const override;
 private:
 	lift_t *lift;
 };
@@ -86,8 +86,8 @@ class event_check_timeout:public event_t
 {
 public:
 	event_check_timeout(uint64_t time,lift_t *which_lift);
-	void call()const override;
-	bool print(std::ostream&)const override{return false;}
+	void call(std::ostream &os=std::cout)const override;
+	bool print(std::ostream &os=std::cout)const override{(void)os;return false;}
 private:
 	lift_t *lift;
 };
@@ -160,7 +160,7 @@ class event_press_wbutton:public event_t
 public:
 	//按下按钮的时间，方向，楼层
 	event_press_wbutton(uint64_t time,int16_t dire,int16_t floor);
-	void call()const override;
+	void call(std::ostream &os=std::cout)const override;
 private:
 	int16_t dire,floor;
 };
