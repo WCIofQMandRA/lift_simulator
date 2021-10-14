@@ -36,8 +36,11 @@ int main([[maybe_unused]]int argc,[[maybe_unused]]char **argv)
 		bool printed=event_queue.print(std::cout);
 		event_queue.call_and_pop(std::cout);
 		//call()函数可能有输出，所以在call之后才输出用于分割的空行
-		if(printed)std::cout<<"\n";
+#ifndef NDEBUG
 		if(printed)system(R"(bash -c "read -s -n 1 -p \"请按任意键继续...\" && echo \"\"")");
+#endif
+		if(printed)std::cout<<"\n";
+		
 	}
 	return 0;
 }
