@@ -32,3 +32,13 @@ std::ostream& event_t::output_time(std::ostream &os,uint64_t time)const
 }
 
 std::unordered_set<std::string> event_queue_t::event_happening(256);
+
+void event_queue_t::call_and_pop(std::ostream &os)
+{
+	//先erase再call,这样在call中就可以加入相同的事件
+	event_happening.erase(qu.top()->signature);
+	//由于event_passenger_walk的存在，call中插入的事件的优先级可能比top高
+	auto top=std::move(const_cast<std::unique_ptr<event_t>&>(qu.top()));
+	qu.pop();
+	top->call(os);
+}

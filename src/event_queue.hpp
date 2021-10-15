@@ -46,15 +46,7 @@ public:
 		event_happening.insert(new_event->signature);
 		qu.push(std::move(new_event));
 	}
-	void call_and_pop(std::ostream &os=std::cout)
-	{
-		//先erase再call,这样在call中就可以加入相同的事件
-		event_happening.erase(qu.top()->signature);
-		//由于event_passenger_walk的存在，call中插入的事件的优先级可能比top高
-		auto top=std::move(const_cast<std::unique_ptr<event_t>&>(qu.top()));
-		qu.pop();
-		top->call(os);
-	}
+	void call_and_pop(std::ostream &os=std::cout);
 	bool print(std::ostream &os)
 	{
 		return qu.top()->print(os);
