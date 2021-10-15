@@ -136,7 +136,9 @@ uint64_t lift_t::move_to_time(int16_t floor)
 			((f-floor)*lift_down_tick+lift_down_first_extra_tick+lift_down_last_extra_tick);
 		}
 	}
-	else assert(false);//不可能
+	else //已经有人按电梯但电梯尚在加速时可能出现
+		return m_floor>=floor?(m_floor-floor)*lift_down_tick+lift_down_first_extra_tick+lift_down_last_extra_tick:
+		(floor-m_floor)*lift_up_tick+lift_up_first_extra_tick+lift_up_last_extra_tick;
 }
 
 /////////////////////////////////////
@@ -356,6 +358,13 @@ void event_check_lift_state::call(std::ostream &os)const
 		{
 			event_queue.push<event_change_direction>(time+constant::lift_down_first_extra_tick,lift,-2);
 		}
+		//之前漏了这种情况，导致m_direction被误设为0
+		else if(lift->is_called_up())
+		{
+			variable::wall_buttons.switch_off_up(lift->m_floor);
+			lift->m_direction=1;
+			event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,true);
+		}
 		else if(lift->is_called_down_upper()||lift->is_called_up_upper()||
 			lift->is_pressed_upper())
 		{
@@ -419,6 +428,13 @@ void event_check_lift_state::call(std::ostream &os)const
 			lift->is_pressed_upper())
 		{
 			event_queue.push<event_change_direction>(time+constant::lift_up_first_extra_tick,lift,2);
+		}
+		//之前漏了这种情况，导致m_direction被误设为0
+		else if(lift->is_called_down())
+		{
+			variable::wall_buttons.switch_off_down(lift->m_floor);
+			lift->m_direction=-1;
+			event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,true);
 		}
 		else if(lift->is_called_down_lower()||lift->is_called_up_lower()||
 			lift->is_pressed_lower())

@@ -7,6 +7,7 @@
 #include "constants.hpp"
 #include "variables.hpp"
 #include "lift.hpp"
+#include <cassert>
 
 static uint32_t PID=0;
 
@@ -79,7 +80,48 @@ event_passenger_arrive::event_passenger_arrive(const passenger_t &passenger,bool
 
 void event_passenger_arrive::call(std::ostream &)const
 {
-	//TODO: 统计一天中的乘客
+	//统计一天中的乘客
+	using namespace statistic;
+	all_passengers.push({passenger,taking_lift});
+	auto time_cost=passenger.arrive_time-passenger.appear_time;
+	double time_cost_d=static_cast<double>(time_cost);
+	if(passenger.destination>passenger.source)
+	{
+		auto up_floor=passenger.destination-passenger.source;
+		double up_floor_d(up_floor);
+		up_total_passengers++;
+		up_total_tick+=time_cost;
+		up_max_time=std::max(up_max_time,0.1*time_cost_d/up_floor_d);
+		up_min_time=std::min(up_min_time,0.1*time_cost_d/up_floor_d);
+		up_total_floors+=up_floor;
+		if(taking_lift)
+		{
+			up_total_passengers_lift++;
+			up_total_tick_lift+=time_cost;
+			up_max_time_lift=std::max(up_max_time_lift,0.1*time_cost_d/up_floor_d);
+			up_min_time_lift=std::min(up_min_time_lift,0.1*time_cost_d/up_floor_d);
+			up_total_floors_lift+=up_floor;
+		}
+	}
+	else
+	{
+		assert(passenger.destination<passenger.source);
+		auto down_floor=passenger.source-passenger.destination;
+		double down_floor_d(down_floor);
+		down_total_passengers++;
+		down_total_tick+=time_cost;
+		down_max_time=std::max(down_max_time,0.1*time_cost_d/down_floor_d);
+		down_min_time=std::min(down_min_time,0.1*time_cost_d/down_floor_d);
+		down_total_floors+=down_floor;
+		if(taking_lift)
+		{
+			down_total_passengers_lift++;
+			down_total_tick_lift+=time_cost;
+			down_max_time_lift=std::max(down_max_time_lift,0.1*time_cost_d/down_floor_d);
+			down_min_time_lift=std::min(down_min_time_lift,0.1*time_cost_d/down_floor_d);
+			down_total_floors_lift+=down_floor;
+		}
+	}
 }
 
 bool event_passenger_arrive::print(std::ostream &os)const
