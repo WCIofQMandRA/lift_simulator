@@ -216,8 +216,9 @@ event_check_lift_state::event_check_lift_state(uint64_t time,lift_t *which_lift)
 
 void event_check_lift_state::call(std::ostream &os)const
 {
-	//正在全速下降
+	if(lift->m_is_door_open==1)return;//不在正在开门时检查
 	using variable::event_queue;
+	//正在全速下降
 	if(lift->m_direction==-2)
 	{
 		//需要在当前楼层开门——减速
@@ -225,6 +226,7 @@ void event_check_lift_state::call(std::ostream &os)const
 			||lift->is_pressed())
 		{
 			lift->m_waiting_floor=-1;
+			os<<"电梯 #"<<lift->m_liftID<<"减速\n";
 			event_queue.push<event_change_direction>(time+constant::lift_down_last_extra_tick,lift,-1);
 		}
 		//需要继续下降，并在底下的楼层开门
@@ -238,6 +240,7 @@ void event_check_lift_state::call(std::ostream &os)const
 		else if(lift->is_called_up())
 		{
 			lift->m_waiting_floor=-1;
+			os<<"电梯 #"<<lift->m_liftID<<"减速\n";
 			event_queue.push<event_change_direction>(time+constant::lift_down_last_extra_tick,lift,1);
 		}
 		//上方有人呼叫电梯，需要先减速
@@ -249,6 +252,7 @@ void event_check_lift_state::call(std::ostream &os)const
 			//FIXME: constants.h中已指出，lift_down_last_extra_tick并不完全是由减速
 			//引起的，其中还包含了开门的准备时间，而此时，电梯的减速并不是为开门做准备，所以
 			//lift_down_last_extra_tick长于实际用时
+			os<<"电梯 #"<<lift->m_liftID<<"减速\n";
 			event_queue.push<event_change_direction>(time+constant::lift_down_last_extra_tick,lift,1);
 		}
 		//没有人呼叫电梯并且电梯正在返回待命层
@@ -272,6 +276,7 @@ void event_check_lift_state::call(std::ostream &os)const
 			||lift->is_pressed())
 		{
 			lift->m_waiting_floor=-1;
+			os<<"电梯 #"<<lift->m_liftID<<"减速\n";
 			event_queue.push<event_change_direction>(time+constant::lift_up_last_extra_tick,lift,1);
 		}
 		//需要继续上升，并在顶上的楼层开门
@@ -285,6 +290,7 @@ void event_check_lift_state::call(std::ostream &os)const
 		else if(lift->is_called_down())
 		{
 			lift->m_waiting_floor=-1;
+			os<<"电梯 #"<<lift->m_liftID<<"减速\n";
 			event_queue.push<event_change_direction>(time+constant::lift_up_last_extra_tick,lift,-1);
 		}
 		//下方有人呼叫电梯，需要先减速
@@ -294,6 +300,7 @@ void event_check_lift_state::call(std::ostream &os)const
 			//assert(lift->m_waiting_floor!=-1);
 			lift->m_waiting_floor=-1;
 			//FIXME
+			os<<"电梯 #"<<lift->m_liftID<<"减速\n";
 			event_queue.push<event_change_direction>(time+constant::lift_up_last_extra_tick,lift,-1);
 		}
 		//没有人呼叫电梯并且电梯正在返回待命层
@@ -301,7 +308,10 @@ void event_check_lift_state::call(std::ostream &os)const
 		{
 			assert(constant::waiting_floor[lift->m_waiting_floor]>=lift->m_floor);
 			if(constant::waiting_floor[lift->m_waiting_floor]==lift->m_floor)
+			{
+				os<<"电梯 #"<<std::to_string(lift->m_liftID)<<"到达待命楼层.\n";
 				event_queue.push<event_change_direction>(time+constant::lift_up_last_extra_tick,lift,0);
+			}
 			else
 				event_queue.push<event_arrive_at>(time+constant::lift_up_tick,lift,lift->m_floor+1);
 		}
@@ -310,7 +320,7 @@ void event_check_lift_state::call(std::ostream &os)const
 	else if(lift->m_direction==-1)
 	{
 		assert(lift->m_waiting_floor==-1);
-		if(lift->m_is_door_open)
+		if(lift->m_is_door_open==2)
 		{
 			if(lift->m_passengers[lift->m_floor-constant::min_floor].size())
 				event_queue.push<event_passenger_out>(time+rand_between(constant::iolift_tick_range),lift);
@@ -329,6 +339,7 @@ void event_check_lift_state::call(std::ostream &os)const
 				else
 				{
 					//电梯满员：电梯关门、乘客重新呼叫电梯
+					lift->m_is_door_open=1;
 					event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,false);
 					event_queue.push<event_press_wbutton>(time+constant::press_button_tick,-1,lift->m_floor);
 				}
@@ -337,25 +348,30 @@ void event_check_lift_state::call(std::ostream &os)const
 			//在电梯内有人时会按关门键，所以直接关门，否则等待auto_close_door_tick再检查电梯状态
 			else if(lift->m_carrying_weight>1e-5
 				||lift->m_begin_no_passenger_time+constant::auto_close_door_tick<=time)
+			{
+				lift->m_is_door_open=1;
 				event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,false);
+			}
 			else
 				event_queue.push<event_check_lift_state>(time+constant::auto_close_door_tick,lift);
 		}
 		//需要在当前楼层开门
 		else if(bool called_down=lift->is_called_down(),pressed=lift->is_pressed();
-			!lift->m_is_door_open&&(called_down||pressed))
+			lift->m_is_door_open==0&&(called_down||pressed))
 		{
 			//如果电梯因呼叫而减速到-1，则其不可能满员
 			assert(pressed||lift->m_carrying_weight<constant::full_weight);
 			//熄灭按钮
 			variable::wall_buttons.switch_off_down(lift->m_floor);
 			lift->remove_pressed_button();
+			lift->m_is_door_open=1;
 			event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,true);
 		}
 		//需要继续下降，并在底下的楼层开门
 		else if(lift->is_called_down_lower()||lift->is_called_up_lower()||
 			lift->is_pressed_lower())
 		{
+			os<<"电梯 #"<<lift->m_liftID<<"加速\n";
 			event_queue.push<event_change_direction>(time+constant::lift_down_first_extra_tick,lift,-2);
 		}
 		//之前漏了这种情况，导致m_direction被误设为0
@@ -363,11 +379,13 @@ void event_check_lift_state::call(std::ostream &os)const
 		{
 			variable::wall_buttons.switch_off_up(lift->m_floor);
 			lift->m_direction=1;
+			lift->m_is_door_open=1;
 			event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,true);
 		}
 		else if(lift->is_called_down_upper()||lift->is_called_up_upper()||
 			lift->is_pressed_upper())
 		{
+			os<<"电梯 #"<<lift->m_liftID<<"加速\n";
 			event_queue.push<event_change_direction>(time+constant::lift_up_first_extra_tick,lift,2);
 		}
 		else
@@ -380,7 +398,7 @@ void event_check_lift_state::call(std::ostream &os)const
 	else if(lift->m_direction==1)
 	{
 		assert(lift->m_waiting_floor==-1);
-		if(lift->m_is_door_open)
+		if(lift->m_is_door_open==2)
 		{
 			if(lift->m_passengers[lift->m_floor-constant::min_floor].size())
 				event_queue.push<event_passenger_out>(time+rand_between(constant::iolift_tick_range),lift);
@@ -399,6 +417,7 @@ void event_check_lift_state::call(std::ostream &os)const
 				else
 				{
 					//电梯满员：电梯关门、乘客重新呼叫电梯
+					lift->m_is_door_open=1;
 					event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,false);
 					event_queue.push<event_press_wbutton>(time+constant::press_button_tick,1,lift->m_floor);
 				}
@@ -407,26 +426,31 @@ void event_check_lift_state::call(std::ostream &os)const
 			//在电梯内有人时会按关门键，所以直接关门，否则等待auto_close_door_tick再检查电梯状态
 			else if(lift->m_carrying_weight>1e-5
 				||lift->m_begin_no_passenger_time+constant::auto_close_door_tick<=time)
+			{
+				lift->m_is_door_open=1;
 				event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,false);
+			}
 			else
 				event_queue.push<event_check_lift_state>(time+constant::auto_close_door_tick,lift);
 			//else event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,false);
 		}
 		//需要在当前楼层开门
 		else if(bool called_up=lift->is_called_up(),pressed=lift->is_pressed();
-			!lift->m_is_door_open&&(called_up||pressed))
+			lift->m_is_door_open==0&&(called_up||pressed))
 		{
 			//如果电梯因呼叫而减速到1，则其不可能满员
 			assert(pressed||lift->m_carrying_weight<constant::full_weight);
 			//熄灭按钮
 			variable::wall_buttons.switch_off_up(lift->m_floor);
 			lift->remove_pressed_button();
+			lift->m_is_door_open=1;
 			event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,true);
 		}
 		//需要继续上升，并在顶上的楼层开门
 		else if(lift->is_called_down_upper()||lift->is_called_up_upper()||
 			lift->is_pressed_upper())
 		{
+			os<<"电梯 #"<<lift->m_liftID<<"加速\n";
 			event_queue.push<event_change_direction>(time+constant::lift_up_first_extra_tick,lift,2);
 		}
 		//之前漏了这种情况，导致m_direction被误设为0
@@ -434,11 +458,13 @@ void event_check_lift_state::call(std::ostream &os)const
 		{
 			variable::wall_buttons.switch_off_down(lift->m_floor);
 			lift->m_direction=-1;
+			lift->m_is_door_open=1;
 			event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,true);
 		}
 		else if(lift->is_called_down_lower()||lift->is_called_up_lower()||
 			lift->is_pressed_lower())
 		{
+			os<<"电梯 #"<<lift->m_liftID<<"加速\n";
 			event_queue.push<event_change_direction>(time+constant::lift_down_first_extra_tick,lift,-2);
 		}
 		else
@@ -472,6 +498,7 @@ void event_check_lift_state::call(std::ostream &os)const
 		else if(lift->is_called_down_lower()||lift->is_called_up_lower())
 		{
 			lift->m_waiting_floor=-1;
+			os<<"电梯 #"<<lift->m_liftID<<"加速\n";
 			if(!(lift->is_called_down_upper()||lift->is_called_up_upper())||rand_between(0,1))
 				event_queue.push<event_change_direction>(time+constant::lift_down_first_extra_tick,lift,-2);
 			else event_queue.push<event_change_direction>(time+constant::lift_up_first_extra_tick,lift,2);
@@ -480,6 +507,7 @@ void event_check_lift_state::call(std::ostream &os)const
 		else if(lift->is_called_down_upper()||lift->is_called_up_upper())
 		{
 			lift->m_waiting_floor=-1;
+			os<<"电梯 #"<<lift->m_liftID<<"加速\n";
 			event_queue.push<event_change_direction>(time+constant::lift_up_first_extra_tick,lift,2);
 		}
 		else if(lift->m_waiting_floor==-1)
@@ -543,7 +571,7 @@ event_open_door::event_open_door(uint64_t time,lift_t *which_lift,bool open):
 
 void event_open_door::call(std::ostream&)const
 {
-	lift->m_is_door_open=open;
+	lift->m_is_door_open=open?0:2;
 	variable::event_queue.push<event_check_lift_state>(time,lift);
 }
 
@@ -599,9 +627,11 @@ void event_check_timeout::call(std::ostream&)const
 {
 	if(lift->m_direction==0&&lift->m_begin_static_time+constant::return_waiting_floor_tick<=time)
 	{
-		assert(lift->m_called_down_floor==0);
-		assert(lift->m_called_up_floor==0);
+		//错误的断言
+		//assert(lift->m_called_down_floor==0);
+		//assert(lift->m_called_up_floor==0);
 		assert(lift->m_pressed_button==0);
+		assert(fabs(lift->m_carrying_weight)<1e-6);
 		variable::event_queue.push<event_check_lift_state>(time,lift);
 	}
 }

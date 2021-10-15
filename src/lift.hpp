@@ -134,8 +134,7 @@ private:
 	void move_to(uint64_t time,int16_t floor);//移动到指定楼层
 	void check_state(uint64_t time);//检查状态
 private:
-	//TODO: 引入正在开门/关门的状态
-	bool m_is_door_open=false,m_passenger_ioing=false;//是否开门, 乘客是否正在上下电梯
+	int8_t m_is_door_open=0;//是否开门0:关门 1:正在开门 2:开门
 	//若电梯正在返回或已经位于待命层，则为0/1，否则为-1
 	//电梯的待命层为waiting_floor[m_waiting_floor]
 	int16_t m_waiting_floor=-1;
