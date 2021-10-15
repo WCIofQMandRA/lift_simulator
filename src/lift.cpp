@@ -341,6 +341,7 @@ void event_check_lift_state::call(std::ostream &os)const
 				{
 					event_queue.push<event_passenger_walk>(pass.appear_time+pass.tolerance_time,pass);
 					variable::waiting_queues_down[lift->m_floor-constant::min_floor].pop();
+					event_queue.push<event_check_lift_state>(time,lift);
 				}
 				//电梯没有满员
 				else if(lift->m_carrying_weight<constant::full_weight)
@@ -421,6 +422,7 @@ void event_check_lift_state::call(std::ostream &os)const
 				{
 					event_queue.push<event_passenger_walk>(pass.appear_time+pass.tolerance_time,pass);
 					variable::waiting_queues_up[lift->m_floor-constant::min_floor].pop();
+					event_queue.push<event_check_lift_state>(time,lift);
 				}
 				//电梯没有满员
 				else if(lift->m_carrying_weight<constant::full_weight)

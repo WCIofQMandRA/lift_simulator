@@ -9,6 +9,7 @@
 #include <iostream>
 #include <memory>
 #include <unordered_set>
+#include <cassert>
 
 //事件
 class event_t
@@ -49,8 +50,10 @@ public:
 	{
 		//先erase再call,这样在call中就可以加入相同的事件
 		event_happening.erase(qu.top()->signature);
-		qu.top()->call(os);
+		//由于event_passenger_walk的存在，call中插入的事件的优先级可能比top高
+		auto top=std::move(const_cast<std::unique_ptr<event_t>&>(qu.top()));
 		qu.pop();
+		top->call(os);
 	}
 	bool print(std::ostream &os)
 	{

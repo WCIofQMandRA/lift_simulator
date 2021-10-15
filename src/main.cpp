@@ -51,7 +51,7 @@ int main([[maybe_unused]]int argc,[[maybe_unused]]char **argv)
 	rand_engine.seed(std::random_device()());
 #else
 	auto seed=std::random_device()();
-	//auto seed=
+	//auto seed=405214910;
 	std::cout<<"Seed: "<<seed<<"\n\n";
 	rand_engine.seed(seed);
 #endif
