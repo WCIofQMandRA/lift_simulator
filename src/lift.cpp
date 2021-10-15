@@ -352,7 +352,7 @@ void event_check_lift_state::call(std::ostream &os)const
 				}
 			}
 			//没有人需要进出
-			//在电梯内有人时会按关门键，否则等待auto_close_door_tick再关门
+			//在电梯内有人时会按关门键，所以直接关门，否则等待auto_close_door_tick再检查电梯状态
 			else if(lift->m_carrying_weight>1e-5
 				||lift->m_begin_no_passenger_time+constant::auto_close_door_tick<=time)
 				event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,false);
