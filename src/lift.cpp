@@ -169,7 +169,7 @@ void event_press_wbutton::call(std::ostream&)const
 event_check_lift_state::event_check_lift_state(uint64_t time,lift_t *which_lift):
 	event_t(time,""),lift(which_lift){}
 
-void event_check_lift_state::call(std::ostream&)const
+void event_check_lift_state::call(std::ostream &os)const
 {
 	//TODO
 	//正在全速下降
@@ -199,7 +199,8 @@ void event_check_lift_state::call(std::ostream&)const
 		//上方有人呼叫电梯，需要先减速
 		else if(lift->is_called_up_upper()||lift->is_called_down_upper())
 		{
-			assert(lift->m_waiting_floor!=-1);
+			//呼叫电梯的函数已经把m_waiting_floor设置为-1，所以这个assertion一定失败
+			//assert(lift->m_waiting_floor!=-1);
 			lift->m_waiting_floor=-1;
 			//FIXME: constants.h中已指出，lift_down_last_extra_tick并不完全是由减速
 			//引起的，其中还包含了开门的准备时间，而此时，电梯的减速并不是为开门做准备，所以
@@ -211,7 +212,10 @@ void event_check_lift_state::call(std::ostream&)const
 		{
 			assert(constant::waiting_floor[lift->m_waiting_floor]<=lift->m_floor);
 			if(constant::waiting_floor[lift->m_waiting_floor]==lift->m_floor)
+			{
+				os<<"电梯 #"<<std::to_string(lift->m_liftID)<<"到达待命楼层.\n";
 				event_queue.push<event_change_direction>(time+constant::lift_down_last_extra_tick,lift,0);
+			}
 			else
 				event_queue.push<event_arrive_at>(time+constant::lift_down_tick,lift,lift->m_floor-1);
 		}
@@ -242,7 +246,8 @@ void event_check_lift_state::call(std::ostream&)const
 		//下方有人呼叫电梯，需要先减速
 		else if(lift->is_called_up_lower()||lift->is_called_down_lower()||lift->is_called_down())
 		{
-			assert(lift->m_waiting_floor!=-1);
+			//呼叫电梯的函数已经把m_waiting_floor设置为-1，所以这个assertion一定失败
+			//assert(lift->m_waiting_floor!=-1);
 			lift->m_waiting_floor=-1;
 			//FIXME
 			event_queue.push<event_change_direction>(time+constant::lift_up_last_extra_tick,lift,-1);
@@ -427,10 +432,16 @@ void event_check_lift_state::call(std::ostream&)const
 					lift->m_waiting_floor=d0<=d1?0:1;
 				}
 				}
-				if(lift->m_waiting_floor<lift->m_floor)
+				if(constant::waiting_floor[lift->m_waiting_floor]<lift->m_floor)
+				{
+					os<<"电梯 #"<<std::to_string(lift->m_liftID)<<"前往待命楼层.\n";
 					event_queue.push<event_change_direction>(time+constant::lift_down_first_extra_tick,lift,-2);
-				else if(lift->m_waiting_floor>lift->m_floor)
+				}
+				else if(constant::waiting_floor[lift->m_waiting_floor]>lift->m_floor)
+				{
+					os<<"电梯 #"<<std::to_string(lift->m_liftID)<<"前往待命楼层.\n";
 					event_queue.push<event_change_direction>(time+constant::lift_up_first_extra_tick,lift,2);
+				}
 				//否则电梯已位于待命楼层
 			}
 			else event_queue.push<event_check_timeout>(lift->m_begin_static_time+constant::return_waiting_floor_tick,lift);
