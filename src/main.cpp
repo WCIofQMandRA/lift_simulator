@@ -50,8 +50,8 @@ int main([[maybe_unused]]int argc,[[maybe_unused]]char **argv)
 #ifdef NDEBUG
 	rand_engine.seed(std::random_device()());
 #else
-	//auto seed=std::random_device()();
-	auto seed=405214910;
+	auto seed=std::random_device()();
+	//auto seed=;
 	std::cout<<"Seed: "<<seed<<"\n\n";
 	rand_engine.seed(seed);
 #endif

@@ -64,7 +64,10 @@ event_passenger_walk::event_passenger_walk(uint64_t time,const passenger_t &pass
 void event_passenger_walk::call(std::ostream &)const
 {
 	auto pass2=passenger;
-	pass2.arrive_time=time;
+	pass2.arrive_time=time+(pass2.source>pass2.destination?(pass2.source-pass2.destination)
+		*rand_between(constant::walk_down_tick_range)+rand_between(constant::walk_down_fl_extra)
+		:(pass2.destination-pass2.source)*rand_between(constant::walk_up_tick_range)+
+		rand_between(constant::walk_up_fl_extra));
 	variable::event_queue.push<event_passenger_arrive>(pass2,false);
 }
 

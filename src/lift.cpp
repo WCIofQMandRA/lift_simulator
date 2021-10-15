@@ -597,6 +597,7 @@ event_open_door::event_open_door(uint64_t time,lift_t *which_lift,bool open):
 void event_open_door::call(std::ostream&)const
 {
 	lift->m_is_door_open=open?2:0;
+	lift->m_begin_no_passenger_time=time;
 	variable::event_queue.push<event_check_lift_state>(time,lift);
 }
 
