@@ -91,9 +91,52 @@ bool lift_t::is_called_down_upper()
 
 uint64_t lift_t::move_to_time(int16_t floor)
 {
-	//TODO
-	return m_floor>=floor?(m_floor-floor)*constant::lift_down_tick:
-		(floor-m_floor)*constant::lift_up_tick;
+	//TODO: 按↑呼叫和按↓呼叫的move_to_time可能不同
+	using namespace constant;
+	if(m_called_down_floor==0&&m_called_up_floor==0&&m_pressed_button==0)
+	{
+		return m_floor>=floor?(m_floor-floor)*lift_down_tick+lift_down_first_extra_tick+lift_down_last_extra_tick:
+		(floor-m_floor)*lift_up_tick+lift_up_first_extra_tick+lift_up_last_extra_tick;
+	}
+	else if(m_direction<0)
+	{
+		if(floor<m_floor)
+			return (m_floor-floor)*lift_down_tick+lift_down_first_extra_tick+lift_down_last_extra_tick;
+		else
+		{
+			int16_t f=0;
+			auto tmp=m_called_up_floor|m_called_down_floor|m_pressed_button;
+			while(!(tmp&((uint64_t)1<<f)))++f;
+			f+=min_floor;
+			return 
+			//下到f的时间
+			((m_floor-f)*lift_down_tick+lift_down_first_extra_tick+lift_down_last_extra_tick)+
+			//人进出电梯的时间
+			(ocdoor_tick*2+iolift_tick_range.second)+
+			//从f上去的时间
+			((floor-f)*lift_up_tick+lift_up_first_extra_tick+lift_up_last_extra_tick);
+		}
+	}
+	else if(m_direction>0)
+	{
+		if(floor>m_floor)
+			return (floor-m_floor)*lift_up_tick+lift_up_first_extra_tick+lift_up_last_extra_tick;
+		else
+		{
+			int16_t f=max_floor-min_floor;
+			auto tmp=m_called_up_floor|m_called_down_floor|m_pressed_button;
+			while(!(tmp&((uint64_t)1<<f)))--f;
+			f+=min_floor;
+			return 
+			//上到f的时间
+			((f-m_floor)*lift_up_tick+lift_up_first_extra_tick+lift_up_last_extra_tick)+
+			//人进出电梯的时间
+			(ocdoor_tick*2+iolift_tick_range.second)+
+			//从f下去的时间
+			((f-floor)*lift_down_tick+lift_down_first_extra_tick+lift_down_last_extra_tick);
+		}
+	}
+	else assert(false);//不可能
 }
 
 /////////////////////////////////////
