@@ -95,7 +95,7 @@ private:
 	void re_allocate(size_t new_capcity)
 	{
 		T *new_elem=new T[new_capcity];
-		for(size_t i=0,j=m_front;j!=m_back;++i,j=j==m_capcity?0:j+1)
+		for(size_t i=0,j=m_front;j!=m_back;++i,j=j==m_capcity-1?0:j+1)
 			new_elem[i]=elem[j];
 		delete[] elem;
 		m_front=0;m_back=m_size;
