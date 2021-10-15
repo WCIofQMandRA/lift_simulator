@@ -140,12 +140,13 @@ private:
 	int16_t m_waiting_floor=-1;
 	int16_t m_floor=1;//楼层
 	int16_t m_liftID;//电梯编号
-	//移动方向：-2 -1 0 1 2
+	//移动方向：-3 -2 -1 0 1 2 3
 	//耗时：
-	//-2 -> -1 lift_down_last_extra_tick
-	//-1 -> -2 lift_down_first_extra_tick
-	//2 -> 1 lift_up_last_extra_tick
-	//1 -> 2 lift_up_first_extra_tick
+	//-3 -> -1 lift_down_last_extra_tick
+	//-1 -> -3 lift_down_first_extra_tick
+	//3 -> 1 lift_up_last_extra_tick
+	//1 -> 3 lift_up_first_extra_tick
+	//-2/2是正在加/减速的状态
 	int16_t m_direction=0;
 	uint64_t m_begin_static_time=0,m_begin_no_passenger_time=0;//开始处在静止状态的时刻; 开始处在未载客的状态的时刻
 	double m_carrying_weight=0;//载的乘客的质量
