@@ -40,5 +40,7 @@ void event_queue_t::call_and_pop(std::ostream &os)
 	//由于event_passenger_walk的存在，call中插入的事件的优先级可能比top高
 	auto top=std::move(const_cast<std::unique_ptr<event_t>&>(qu.top()));
 	qu.pop();
+	if(top->time==(8*3600+4*60+48)*10+9)
+		std::cout<<"Attention!\n";
 	top->call(os);
 }
