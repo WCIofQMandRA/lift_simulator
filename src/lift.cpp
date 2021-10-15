@@ -171,7 +171,6 @@ event_check_lift_state::event_check_lift_state(uint64_t time,lift_t *which_lift)
 
 void event_check_lift_state::call(std::ostream &os)const
 {
-	//TODO
 	//正在全速下降
 	using variable::event_queue;
 	if(lift->m_direction==-2)
@@ -290,8 +289,12 @@ void event_check_lift_state::call(std::ostream &os)const
 				}
 			}
 			//没有人需要进出
-			//TODO:在电梯内有人时会按关门键，否则等待auto_close_door_tick再关门
-			else event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,false);
+			//在电梯内有人时会按关门键，所以直接关门，否则等待auto_close_door_tick再检查电梯状态
+			else if(lift->m_carrying_weight>1e-5
+				||lift->m_begin_no_passenger_time+constant::auto_close_door_tick<=time)
+				event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,false);
+			else
+				event_queue.push<event_check_lift_state>(time+constant::auto_close_door_tick,lift);
 		}
 		//需要在当前楼层开门
 		else if(bool called_down=lift->is_called_down(),pressed=lift->is_pressed();
@@ -349,8 +352,13 @@ void event_check_lift_state::call(std::ostream &os)const
 				}
 			}
 			//没有人需要进出
-			//TODO:在电梯内有人时会按关门键，否则等待auto_close_door_tick再关门
-			else event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,false);
+			//在电梯内有人时会按关门键，否则等待auto_close_door_tick再关门
+			else if(lift->m_carrying_weight>1e-5
+				||lift->m_begin_no_passenger_time+constant::auto_close_door_tick<=time)
+				event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,false);
+			else
+				event_queue.push<event_check_lift_state>(time+constant::auto_close_door_tick,lift);
+			//else event_queue.push<event_open_door>(time+constant::ocdoor_tick,lift,false);
 		}
 		//需要在当前楼层开门
 		else if(bool called_up=lift->is_called_up(),pressed=lift->is_pressed();
@@ -491,6 +499,8 @@ void event_passenger_out::call(std::ostream &os)const
 	lift->m_carrying_weight-=pass.weight;
 	os<<"乘客信息: #"<<pass.ID<<", "<<pass.source<<"->"<<pass.destination<<", "<<pass.weight<<"kg\n";
 	pass.arrive_time=time;
+	if(lift->m_passengers[lift->m_floor-constant::min_floor].empty())
+		lift->m_begin_no_passenger_time=time;
 	variable::event_queue.push<event_passenger_arrive>(pass,true);
 	variable::event_queue.push<event_check_lift_state>(time,lift);
 }

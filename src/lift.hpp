@@ -148,7 +148,7 @@ private:
 	//2 -> 1 lift_up_last_extra_tick
 	//1 -> 2 lift_up_first_extra_tick
 	int16_t m_direction=0;
-	uint64_t m_begin_static_time=0;//开始处在静止状态的时刻
+	uint64_t m_begin_static_time=0,m_begin_no_passenger_time=0;//开始处在静止状态的时刻; 开始处在未载客的状态的时刻
 	double m_carrying_weight=0;//载的乘客的质量
 	uint64_t m_pressed_button=0;//按下的楼层按钮
 	uint64_t m_called_down_floor=0,m_called_up_floor=0;//呼叫电梯的楼层
