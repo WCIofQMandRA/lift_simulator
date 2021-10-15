@@ -621,26 +621,34 @@ event_passenger_in::event_passenger_in(uint64_t time,lift_t *which_lift,int16_t 
 
 void event_passenger_in::call(std::ostream &os)const
 {
-	if(dire>0)
+	try
 	{
-		auto &pass=variable::waiting_queues_up[lift->m_floor-constant::min_floor].front();
-		os<<"乘客信息: #"<<pass.ID<<", "<<pass.source<<"->"<<pass.destination<<", "<<pass.weight<<"kg\n";
-		lift->m_carrying_weight+=pass.weight;
-		lift->m_passengers[pass.destination-constant::min_floor].push(pass);
-		//把乘客按电梯内的楼层按钮的时间也算在进入电梯的时间中，故直接用time
-		lift->add_pressed_button(time,pass.destination);
-		variable::waiting_queues_up[lift->m_floor].pop();
+		if(dire>0)
+		{
+			auto &pass=variable::waiting_queues_up[lift->m_floor-constant::min_floor].front();
+			os<<"乘客信息: #"<<pass.ID<<", "<<pass.source<<"->"<<pass.destination<<", "<<pass.weight<<"kg\n";
+			lift->m_carrying_weight+=pass.weight;
+			lift->m_passengers[pass.destination-constant::min_floor].push(pass);
+			//把乘客按电梯内的楼层按钮的时间也算在进入电梯的时间中，故直接用time
+			lift->add_pressed_button(time,pass.destination);
+			variable::waiting_queues_up[lift->m_floor].pop();
+		}
+		else
+		{
+			auto &pass=variable::waiting_queues_down[lift->m_floor-constant::min_floor].front();
+			os<<"乘客信息: #"<<pass.ID<<", "<<pass.source<<"->"<<pass.destination<<", "<<pass.weight<<"kg\n";
+			lift->m_carrying_weight+=pass.weight;
+			lift->m_passengers[pass.destination-constant::min_floor].push(pass);
+			lift->add_pressed_button(time,pass.destination);
+			variable::waiting_queues_down[lift->m_floor].pop();
+		}
+		variable::event_queue.push<event_check_lift_state>(time,lift);
 	}
-	else
+	catch(std::out_of_range &exception)
 	{
-		auto &pass=variable::waiting_queues_down[lift->m_floor-constant::min_floor].front();
-		os<<"乘客信息: #"<<pass.ID<<", "<<pass.source<<"->"<<pass.destination<<", "<<pass.weight<<"kg\n";
-		lift->m_carrying_weight+=pass.weight;
-		lift->m_passengers[pass.destination-constant::min_floor].push(pass);
-		lift->add_pressed_button(time,pass.destination);
-		variable::waiting_queues_down[lift->m_floor].pop();
+		os<<"注意: 捕获到异常std::out_of_range\nwhat()="<<exception.what()
+		<<"\n这可能是由于两部电梯同时开门，乘客都进入另一部电梯了.\n";
 	}
-	variable::event_queue.push<event_check_lift_state>(time,lift);
 }
 
 event_check_timeout::event_check_timeout(uint64_t time,lift_t *which_lift):
