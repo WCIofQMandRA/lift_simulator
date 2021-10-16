@@ -64,7 +64,7 @@ static void output_statistics()
 		all_passengers.pop();
 	}
 	fout.close();
-	cout<<"相信信息见 "<<filename<<endl;
+	cout<<"详细信息见 "<<filename<<endl;
 }
 
 int main([[maybe_unused]]int argc,[[maybe_unused]]char **argv)
