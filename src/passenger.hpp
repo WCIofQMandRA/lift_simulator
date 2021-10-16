@@ -10,9 +10,10 @@ struct passenger_t
 	int16_t source,destination;
 	uint32_t ID;
 	double weight;
-	uint64_t appear_time;//出现时间
-	uint64_t tolerance_time;//最大等待时间
-	uint64_t arrive_time;//到达时间
+	uint64_t appear_time;//出现时刻
+	uint64_t tolerance_time;//最大等待时刻
+	uint64_t depart_time;//出发的时刻，即进入电梯的时刻或开始走楼梯的时刻
+	uint64_t arrive_time;//到达时刻
 	static passenger_t generate(int16_t from,uint64_t appear_time);
 };
 

@@ -28,7 +28,7 @@ passenger_t passenger_t::generate(int16_t from,uint64_t appear_time)
 		tolerance=static_cast<uint64_t>(double((from-dest)*walk_down_tick_range.second+walk_down_fl_extra.second)
 			*rand_between(tolerance_tick_rate_range)+0.5);
 	}
-	return {from,dest,PID++,rand_between(passenger_weight_range),appear_time,tolerance,0};
+	return {from,dest,PID++,rand_between(passenger_weight_range),appear_time,tolerance,0,0};
 }
 
 event_passenger_appear::event_passenger_appear(uint64_t time,int16_t src):
@@ -68,6 +68,7 @@ void event_passenger_walk::call(std::ostream &)const
 		*rand_between(constant::walk_down_tick_range)+rand_between(constant::walk_down_fl_extra)
 		:(pass2.destination-pass2.source)*rand_between(constant::walk_up_tick_range)+
 		rand_between(constant::walk_up_fl_extra));
+	pass2.depart_time=time;
 	variable::event_queue.push<event_passenger_arrive>(pass2,false);
 }
 

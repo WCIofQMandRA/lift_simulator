@@ -629,6 +629,7 @@ void event_passenger_in::call(std::ostream &os)const
 		if(dire>0)
 		{
 			auto &pass=variable::waiting_queues_up[lift->m_floor-constant::min_floor].front();
+			pass.depart_time=time;
 			os<<"乘客信息: #"<<pass.ID<<", "<<pass.source<<"->"<<pass.destination<<", "<<pass.weight<<"kg\n";
 			lift->m_carrying_weight+=pass.weight;
 			lift->m_passengers[pass.destination-constant::min_floor].push(pass);
@@ -639,6 +640,7 @@ void event_passenger_in::call(std::ostream &os)const
 		else
 		{
 			auto &pass=variable::waiting_queues_down[lift->m_floor-constant::min_floor].front();
+			pass.depart_time=time;
 			os<<"乘客信息: #"<<pass.ID<<", "<<pass.source<<"->"<<pass.destination<<", "<<pass.weight<<"kg\n";
 			lift->m_carrying_weight+=pass.weight;
 			lift->m_passengers[pass.destination-constant::min_floor].push(pass);

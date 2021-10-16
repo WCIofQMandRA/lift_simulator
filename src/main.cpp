@@ -54,12 +54,12 @@ static void output_statistics()
 
 	std::string filename=std::to_string(rand_between(0,100000000))+".csv";
 	std::ofstream fout(filename);
-	fout<<"乘客,起点,终点,出发时间,到达时间,最大等待时间,乘坐电梯\n";
+	fout<<"乘客,起点,终点,出现时刻,启程时刻,到达时刻,最大等待时间,乘坐电梯\n";
 	while(!all_passengers.empty())
 	{
 		auto &p=all_passengers.front();
 		fout<<p.first.ID<<","<<p.first.source<<","<<p.first.destination<<","
-		<<p.first.appear_time<<","<<p.first.arrive_time<<","<<p.first.tolerance_time<<","
+		<<p.first.appear_time<<","<<p.first.depart_time<<","<<p.first.arrive_time<<","<<p.first.tolerance_time<<","
 		<<p.second<<"\n";
 		all_passengers.pop();
 	}

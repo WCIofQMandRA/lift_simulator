@@ -61,6 +61,12 @@ public:
 		catch(...){}
 	}
 	
+	T& front()
+	{
+		if(!m_size)throw std::out_of_range("zzc::queue::front(): The queue is empty.");
+		return elem[m_front];
+	}
+
 	const T& front()const
 	{
 		if(!m_size)throw std::out_of_range("zzc::queue::front(): The queue is empty.");
