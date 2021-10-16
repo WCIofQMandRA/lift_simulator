@@ -11,6 +11,7 @@
 #include <iostream>
 #include <array>
 #include <iomanip>
+#include <fstream>
 
 //生成乘客
 void generate_passengers()
@@ -36,12 +37,34 @@ static void output_statistics()
 	<<"， 其中"<<up_total_passengers_lift+down_total_passengers_lift<<"人乘坐电梯\n";
 	cout<<"平均耗时: 上楼"<<0.1*(double)up_total_tick/(double)up_total_floors<<"s/层   下楼"
 	<<0.1*(double)down_total_tick/(double)down_total_floors<<"s/层\n";
-	cout<<"乘梯的平均耗时: 上楼"<<0.1*(double)up_total_tick_lift/(double)up_total_floors_lift<<"s/层   下楼"
+	cout<<"电梯的平均耗时: 上楼"<<0.1*(double)up_total_tick_lift/(double)up_total_floors_lift<<"s/层   下楼"
 	<<0.1*(double)down_total_tick_lift/(double)down_total_floors_lift<<"s/层\n";
+	cout<<"楼梯的平均耗时: 上楼"<<0.1*double(up_total_tick-up_total_tick_lift)
+	/double(up_total_floors-up_total_floors_lift)<<"s/层   下楼"
+	<<0.1*double(down_total_tick-down_total_tick_lift)
+	/double(down_total_floors-down_total_floors_lift)<<"s/层\n\n";
+
 	cout<<"最长耗时: 上楼"<<up_max_time<<"s/层   下楼"<<down_max_time<<"s/层\n";
-	cout<<"乘梯的最长耗时: 上楼"<<up_max_time_lift<<"s/层   下楼"<<down_max_time_lift<<"s/层\n";
+	cout<<"电梯的最长耗时: 上楼"<<up_max_time_lift<<"s/层   下楼"<<down_max_time_lift<<"s/层\n";
+	cout<<"楼梯的最长耗时: 上楼"<<up_max_time_stairs<<"s/层   下楼"<<down_max_time_stairs<<"s/层\n\n";
+
 	cout<<"最短耗时: 上楼"<<up_min_time<<"s/层   下楼"<<down_min_time<<"s/层\n";
-	cout<<"乘梯的最短耗时: 上楼"<<up_min_time_lift<<"s/层   下楼"<<down_min_time_lift<<"s/层\n";
+	cout<<"电梯的最短耗时: 上楼"<<up_min_time_lift<<"s/层   下楼"<<down_min_time_lift<<"s/层\n";
+	cout<<"楼梯的最短耗时: 上楼"<<up_min_time_stairs<<"s/层   下楼"<<down_min_time_stairs<<"s/层\n\n";
+
+	std::string filename=std::to_string(rand_between(0,100000000))+".csv";
+	std::ofstream fout(filename);
+	fout<<"乘客,起点,终点,出发时间,到达时间,最大等待时间,乘坐电梯\n";
+	while(!all_passengers.empty())
+	{
+		auto &p=all_passengers.front();
+		fout<<p.first.ID<<","<<p.first.source<<","<<p.first.destination<<","
+		<<p.first.appear_time<<","<<p.first.arrive_time<<","<<p.first.tolerance_time<<","
+		<<p.second<<"\n";
+		all_passengers.pop();
+	}
+	fout.close();
+	cout<<"相信信息见 "<<filename<<endl;
 }
 
 int main([[maybe_unused]]int argc,[[maybe_unused]]char **argv)

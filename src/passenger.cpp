@@ -105,6 +105,11 @@ void event_passenger_arrive::call(std::ostream &)const
 			up_min_time_lift=std::min(up_min_time_lift,0.1*time_cost_d/up_floor_d);
 			up_total_floors_lift+=up_floor;
 		}
+		else
+		{
+			up_max_time_stairs=std::max(up_max_time_stairs,0.1*time_cost_d/up_floor_d);
+			up_min_time_stairs=std::min(up_min_time_stairs,0.1*time_cost_d/up_floor_d);
+		}
 	}
 	else
 	{
@@ -123,6 +128,11 @@ void event_passenger_arrive::call(std::ostream &)const
 			down_max_time_lift=std::max(down_max_time_lift,0.1*time_cost_d/down_floor_d);
 			down_min_time_lift=std::min(down_min_time_lift,0.1*time_cost_d/down_floor_d);
 			down_total_floors_lift+=down_floor;
+		}
+		else
+		{
+			down_max_time_stairs=std::max(down_max_time_stairs,0.1*time_cost_d/down_floor_d);
+			down_min_time_stairs=std::min(down_min_time_stairs,0.1*time_cost_d/down_floor_d);
 		}
 	}
 }

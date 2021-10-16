@@ -26,8 +26,10 @@ extern uint64_t up_total_tick,down_total_tick;              //总用时
 extern uint64_t up_total_tick_lift,down_total_tick_lift;
 extern double up_max_time,down_max_time;                    //最长用时
 extern double up_max_time_lift,down_max_time_lift;
+extern double up_max_time_stairs,down_max_time_stairs;
 extern double up_min_time,down_min_time;                    //最短用时
 extern double up_min_time_lift,down_min_time_lift;
+extern double up_min_time_stairs,down_min_time_stairs;
 extern uint64_t up_total_floors,down_total_floors;          //上升/下降的总楼层数
 extern uint64_t up_total_floors_lift,down_total_floors_lift;
 extern zzc::queue<std::pair<passenger_t,bool>> all_passengers;//一天内出现的所有乘客

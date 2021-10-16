@@ -24,8 +24,10 @@ uint64_t up_total_tick=0,down_total_tick=0;     //总用时
 uint64_t up_total_tick_lift=0,down_total_tick_lift=0;
 double up_max_time=0,down_max_time=0;         //最长用时
 double up_max_time_lift=0,down_max_time_lift=0;
+double up_max_time_stairs=0,down_max_time_stairs=0;
 double up_min_time=inf,down_min_time=inf;       //最短用时
 double up_min_time_lift=inf,down_min_time_lift=inf;
+double up_min_time_stairs=inf,down_min_time_stairs=inf;
 uint64_t up_total_floors=0,down_total_floors=0; //上升/下降的总楼层数
 uint64_t up_total_floors_lift=0,down_total_floors_lift=0;
 zzc::queue<std::pair<passenger_t,bool>> all_passengers;
