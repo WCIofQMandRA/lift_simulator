@@ -10,8 +10,6 @@
 
 #define ADD_FRIEND_IMPL(x) friend class event_##x
 
-#define ADD_FRIEND(...) ZZCPP_FOR_EACH(ADD_FRIEND_IMPL,;,__VA_ARGS__)
-
 class wbutton_t;
 class lift_t;
 
@@ -104,12 +102,13 @@ class lift_t
 {
 public:
 	friend class wbutton_t;
-	ADD_FRIEND(check_lift_state,arrive_at,change_direction,open_door,
+	ZZCPP_FOR_EACH(ADD_FRIEND_IMPL,;,check_lift_state,arrive_at,change_direction,open_door,
 		passenger_out,passenger_in,check_timeout);
 	lift_t(int16_t ID):m_liftID(ID){}
 	lift_t(const lift_t&)=delete;
 	void press_floor(uint64_t time,int16_t floor);//按楼层键
 	void press_close(uint64_t time);//按关门键
+	void size_nfloors(){m_passengers.resize(constant::n_floors);}
 private:
 	void add_called_up_floor(uint64_t time,int16_t floor);//将floor添加到m_called_up_floor中
 	void add_called_down_floor(uint64_t time,int16_t floor);
@@ -152,7 +151,7 @@ private:
 	double m_carrying_weight=0;//载的乘客的质量
 	uint64_t m_pressed_button=0;//按下的楼层按钮
 	uint64_t m_called_down_floor=0,m_called_up_floor=0;//呼叫电梯的楼层
-	std::array<zzc::queue<passenger_t>,constant::n_floors> m_passengers;//电梯内的乘客
+	std::vector<zzc::queue<passenger_t>> m_passengers;//电梯内的乘客
 };
 
 //按下墙上的按钮
@@ -171,7 +170,7 @@ class wbutton_t
 {
 public:
 	friend class lift_t;
-	ADD_FRIEND(press_wbutton,check_lift_state);
+	ZZCPP_FOR_EACH(ADD_FRIEND_IMPL,;,press_wbutton,check_lift_state);
 	wbutton_t()=default;
 	wbutton_t(const wbutton_t&)=delete;
 	bool is_up_pressed(int16_t floor)const;
@@ -187,3 +186,4 @@ private:
 	uint64_t m_up_pressed;//向上的按钮被按下
 	uint64_t m_down_pressed;//向下的按钮被按下
 };
+#undef ADD_FRIEND_IMPL

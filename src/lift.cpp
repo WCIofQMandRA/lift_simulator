@@ -122,7 +122,7 @@ uint64_t lift_t::move_to_time(int16_t floor)
 			return (floor-m_floor)*lift_up_tick+lift_up_first_extra_tick+lift_up_last_extra_tick;
 		else
 		{
-			int16_t f=n_floors-1;
+			int16_t f=static_cast<int16_t>(n_floors-1);
 			auto tmp=m_called_up_floor|m_called_down_floor|m_pressed_button;
 			while(!(tmp&((uint64_t)1<<f)))--f;
 			return 

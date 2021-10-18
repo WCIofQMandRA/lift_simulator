@@ -18,7 +18,7 @@ passenger_t passenger_t::generate(int16_t from,uint64_t appear_time)
 	uint64_t tolerance;
 	if(from<=base_floor)
 	{
-		dest=rand_between<int16_t>(base_floor+1,n_floors-1);
+		dest=static_cast<int16_t>(rand_between(base_floor+1,n_floors-1));
 		tolerance=static_cast<uint64_t>(double((dest-from)*walk_up_tick_range.second+walk_up_fl_extra.second)
 			*rand_between(tolerance_tick_rate_range)+0.5);
 	}
