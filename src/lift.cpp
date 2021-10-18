@@ -648,13 +648,13 @@ void event_passenger_in::call(std::ostream &os)const
 			lift->add_pressed_button(time,pass.destination);
 			variable::waiting_queues_down[lift->m_floor].pop();
 		}
-		variable::event_queue.push<event_check_lift_state>(time,lift);
 	}
 	catch(std::out_of_range &exception)
 	{
 		os<<"注意: 捕获到异常std::out_of_range\nwhat()="<<exception.what()
 		<<"\n这可能是由于两部电梯同时开门，乘客都进入另一部电梯了.\n";
 	}
+	variable::event_queue.push<event_check_lift_state>(time,lift);
 }
 
 event_check_timeout::event_check_timeout(uint64_t time,lift_t *which_lift):
