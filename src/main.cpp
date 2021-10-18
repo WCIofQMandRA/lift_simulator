@@ -22,8 +22,8 @@ void generate_passengers()
 	{
 		int16_t start;
 		if(rand_between(0,1))
-			start=rand_between(min_floor,base_floor);
-		else start=rand_between<int16_t>(base_floor+1,max_floor);
+			start=rand_between<int16_t>(0,base_floor);
+		else start=rand_between<int16_t>(base_floor+1,n_floors-1);
 		variable::event_queue.push<event_passenger_appear>(rand_between(take_lift_time),start);
 	}
 }
@@ -32,7 +32,7 @@ void generate_passengers()
 static void output_statistics()
 {
 	using namespace statistic;
-	using std::cout,std::endl;
+	using std::cout,std::endl,constant::floor_name;
 	cout<<"总乘客数: "<<up_total_passengers+down_total_passengers
 	<<"， 其中"<<up_total_passengers_lift+down_total_passengers_lift<<"人乘坐电梯\n";
 	cout<<"平均耗时: 上楼"<<0.1*(double)up_total_tick/(double)up_total_floors<<"s/层   下楼"
@@ -58,7 +58,7 @@ static void output_statistics()
 	while(!all_passengers.empty())
 	{
 		auto &p=all_passengers.front();
-		fout<<p.first.ID<<","<<p.first.source<<","<<p.first.destination<<","
+		fout<<p.first.ID<<","<<floor_name[p.first.source]<<","<<floor_name[p.first.destination]<<","
 		<<p.first.appear_time<<","<<p.first.depart_time<<","<<p.first.arrive_time<<","<<p.first.tolerance_time<<","
 		<<p.second<<"\n";
 		all_passengers.pop();

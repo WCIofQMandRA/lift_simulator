@@ -18,13 +18,13 @@ passenger_t passenger_t::generate(int16_t from,uint64_t appear_time)
 	uint64_t tolerance;
 	if(from<=base_floor)
 	{
-		dest=rand_between<int16_t>(base_floor+1,max_floor);
+		dest=rand_between<int16_t>(base_floor+1,n_floors-1);
 		tolerance=static_cast<uint64_t>(double((dest-from)*walk_up_tick_range.second+walk_up_fl_extra.second)
 			*rand_between(tolerance_tick_rate_range)+0.5);
 	}
 	else
 	{
-		dest=rand_between<int>(0,2)?rand_between(min_floor,base_floor):base_floor;
+		dest=rand_between<int>(0,2)?rand_between<int16_t>(0,base_floor):base_floor;
 		tolerance=static_cast<uint64_t>(double((from-dest)*walk_down_tick_range.second+walk_down_fl_extra.second)
 			*rand_between(tolerance_tick_rate_range)+0.5);
 	}
@@ -54,7 +54,8 @@ void event_passenger_appear::call(std::ostream &)const
 bool event_passenger_appear::print(std::ostream &os)const
 {
 	event_t::print(os);
-	os<<"#"<<passenger.ID<<", "<<passenger.source<<"->"<<passenger.destination<<", "<<passenger.weight<<"kg\n";
+	os<<"#"<<passenger.ID<<", "<<constant::floor_name[passenger.source]<<"→"
+	<<constant::floor_name[passenger.destination]<<", "<<passenger.weight<<"kg\n";
 	return true;
 }
 
@@ -75,7 +76,8 @@ void event_passenger_walk::call(std::ostream &)const
 bool event_passenger_walk::print(std::ostream &os)const
 {
 	event_t::print(os);
-	os<<"#"<<passenger.ID<<", "<<passenger.source<<"->"<<passenger.destination<<", "<<passenger.weight<<"kg\n";
+	os<<"#"<<passenger.ID<<", "<<constant::floor_name[passenger.source]<<"→"
+	<<constant::floor_name[passenger.destination]<<", "<<passenger.weight<<"kg\n";
 	return true;
 }
 
@@ -141,7 +143,8 @@ void event_passenger_arrive::call(std::ostream &)const
 bool event_passenger_arrive::print(std::ostream &os)const
 {
 	event_t::print(os);
-	os<<"#"<<passenger.ID<<", "<<passenger.source<<"->"<<passenger.destination<<", "<<passenger.weight<<"kg\n";
+	os<<"#"<<passenger.ID<<", "<<constant::floor_name[passenger.source]<<"→"
+	<<constant::floor_name[passenger.destination]<<", "<<passenger.weight<<"kg\n";
 	output_time(os<<"出发时间: ",passenger.appear_time)<<"\n";
 	output_time(os<<"到达时间: ",passenger.arrive_time)<<"\n";
 	os<<(taking_lift?"(乘坐电梯)\n":"(走楼梯)\n");

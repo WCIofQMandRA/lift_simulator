@@ -12,81 +12,81 @@
 /////////////////////////////////////
 void lift_t::add_called_up_floor(uint64_t time,int16_t floor)
 {
-	m_called_up_floor|=(uint64_t)1<<(floor-constant::min_floor);
+	m_called_up_floor|=(uint64_t)1<<floor;
 	m_waiting_floor=-1;
 	variable::event_queue.push<event_check_lift_state>(time,this);
 }
 
 void lift_t::add_called_down_floor(uint64_t time,int16_t floor)
 {
-	m_called_down_floor|=(uint64_t)1<<(floor-constant::min_floor);
+	m_called_down_floor|=(uint64_t)1<<floor;
 	m_waiting_floor=-1;
 	variable::event_queue.push<event_check_lift_state>(time,this);
 }
 
 void lift_t::add_pressed_button(uint64_t time,int16_t floor)
 {
-	m_pressed_button|=(uint64_t)1<<(floor-constant::min_floor);
+	m_pressed_button|=(uint64_t)1<<floor;
 	m_waiting_floor=-1;
 	variable::event_queue.push<event_check_lift_state>(time,this);
 }
 
 void lift_t::remove_called_up_floor()
 {
-	m_called_up_floor&=~((uint64_t)1<<(m_floor-constant::min_floor));
+	m_called_up_floor&=~((uint64_t)1<<m_floor);
 }
 void lift_t::remove_called_down_floor()
 {
-	m_called_down_floor&=~((uint64_t)1<<(m_floor-constant::min_floor));
+	m_called_down_floor&=~((uint64_t)1<<m_floor);
 }
 void lift_t::remove_called_up_floor(int16_t floor)
 {
-	m_called_up_floor&=~((uint64_t)1<<(floor-constant::min_floor));
+	m_called_up_floor&=~((uint64_t)1<<floor);
 }
 void lift_t::remove_called_down_floor(int16_t floor)
 {
-	m_called_down_floor&=~((uint64_t)1<<(floor-constant::min_floor));
+	m_called_down_floor&=~((uint64_t)1<<floor);
 }
 void lift_t::remove_pressed_button()
 {
-	m_pressed_button&=~((uint64_t)1<<(m_floor-constant::min_floor));
+	m_pressed_button&=~((uint64_t)1<<m_floor);
 }
 bool lift_t::is_pressed()
 {
-	return m_pressed_button&((uint64_t)1<<(m_floor-constant::min_floor));
+	return m_pressed_button&((uint64_t)1<<m_floor);
 }
 bool lift_t::is_pressed_lower()
 {
 	//避免出现左移64位（此时实际左移了64mod64=0位）
-	return m_floor!=constant::min_floor&&m_pressed_button<<(64-(m_floor-constant::min_floor))!=0;
+	return m_floor!=0&&m_pressed_button<<(64-m_floor)!=0;
 }
 bool lift_t::is_pressed_upper()
 {
-	return m_pressed_button>>(m_floor-constant::min_floor+1)!=0;
+	return m_pressed_button>>(m_floor+1)!=0;
 }
 bool lift_t::is_called_up()
 {
-	return m_called_up_floor&((uint64_t)1<<(m_floor-constant::min_floor));
+	return m_called_up_floor&((uint64_t)1<<m_floor);
 }
 bool lift_t::is_called_up_lower()
 {
-	return m_floor!=constant::min_floor&&m_called_up_floor<<(64-(m_floor-constant::min_floor))!=0;
+	return m_floor!=0&&m_called_up_floor<<(64-m_floor)!=0;
 }
 bool lift_t::is_called_up_upper()
 {
-	return m_called_up_floor>>(m_floor-constant::min_floor+1)!=0;
+	return m_called_up_floor>>(m_floor+1)!=0;
 }
 bool lift_t::is_called_down()
 {
-	return m_called_down_floor&((uint64_t)1<<(m_floor-constant::min_floor));
+	return m_called_down_floor&((uint64_t)1<<m_floor);
 }
 bool lift_t::is_called_down_lower()
 {
-	return m_floor!=constant::min_floor&&m_called_down_floor<<(64-(m_floor-constant::min_floor))!=0;
+	return m_floor!=0&&m_called_down_floor<<(64-m_floor)!=0;
 }
 bool lift_t::is_called_down_upper()
 {
-	return m_called_down_floor>>(m_floor-constant::min_floor+1)!=0;
+	return m_called_down_floor>>(m_floor+1)!=0;
 }
 
 uint64_t lift_t::move_to_time(int16_t floor)
@@ -107,7 +107,6 @@ uint64_t lift_t::move_to_time(int16_t floor)
 			int16_t f=0;
 			auto tmp=m_called_up_floor|m_called_down_floor|m_pressed_button;
 			while(!(tmp&((uint64_t)1<<f)))++f;
-			f+=min_floor;
 			return 
 			//下到f的时间
 			((m_floor-f)*lift_down_tick+lift_down_first_extra_tick+lift_down_last_extra_tick)+
@@ -123,10 +122,9 @@ uint64_t lift_t::move_to_time(int16_t floor)
 			return (floor-m_floor)*lift_up_tick+lift_up_first_extra_tick+lift_up_last_extra_tick;
 		else
 		{
-			int16_t f=max_floor-min_floor;
+			int16_t f=n_floors-1;
 			auto tmp=m_called_up_floor|m_called_down_floor|m_pressed_button;
 			while(!(tmp&((uint64_t)1<<f)))--f;
-			f+=min_floor;
 			return 
 			//上到f的时间
 			((f-m_floor)*lift_up_tick+lift_up_first_extra_tick+lift_up_last_extra_tick)+
@@ -147,12 +145,12 @@ uint64_t lift_t::move_to_time(int16_t floor)
 
 bool wbutton_t::is_up_pressed(int16_t floor)const
 {
-	return m_up_pressed&((uint64_t)1<<(floor-constant::min_floor));
+	return m_up_pressed&((uint64_t)1<<floor);
 }
 
 bool wbutton_t::is_down_pressed(int16_t floor)const
 {
-	return m_down_pressed&((uint64_t)1<<(floor-constant::min_floor));
+	return m_down_pressed&((uint64_t)1<<floor);
 }
 
 void wbutton_t::press_up(uint64_t time,int16_t floor)
@@ -160,7 +158,7 @@ void wbutton_t::press_up(uint64_t time,int16_t floor)
 	if(!is_up_pressed(floor))
 	{
 		using variable::lifts;
-		m_up_pressed|=(uint64_t)1<<(floor-constant::min_floor);
+		m_up_pressed|=(uint64_t)1<<floor;
 		auto t0=lifts[0].move_to_time(floor),t1=lifts[1].move_to_time(floor);
 		if(t0<t1||(t0==t1&&rand_between(0,1)))
 			lifts[0].add_called_up_floor(time,floor);
@@ -173,7 +171,7 @@ void wbutton_t::press_down(uint64_t time,int16_t floor)
 	if(!is_down_pressed(floor))
 	{
 		using variable::lifts;
-		m_down_pressed|=(uint64_t)1<<(floor-constant::min_floor);
+		m_down_pressed|=(uint64_t)1<<floor;
 		auto t0=lifts[0].move_to_time(floor),t1=lifts[1].move_to_time(floor);
 		if(t0<t1||(t0==t1&&rand_between(0,1)))
 			lifts[0].add_called_down_floor(time,floor);
@@ -183,13 +181,13 @@ void wbutton_t::press_down(uint64_t time,int16_t floor)
 
 void wbutton_t::switch_off_up(int16_t floor)
 {
-	m_up_pressed&=~((uint64_t)1<<(floor-constant::min_floor));
+	m_up_pressed&=~((uint64_t)1<<floor);
 	for(auto &i:variable::lifts)
 		i.remove_called_up_floor(floor);
 }
 void wbutton_t::switch_off_down(int16_t floor)
 {
-	m_down_pressed&=~((uint64_t)1<<(floor-constant::min_floor));
+	m_down_pressed&=~((uint64_t)1<<floor);
 	for(auto &i:variable::lifts)
 		i.remove_called_down_floor(floor);
 }
@@ -227,7 +225,7 @@ void event_check_lift_state::call(std::ostream &os)const
 			||lift->is_pressed())
 		{
 			lift->m_waiting_floor=-1;
-			os<<"电梯 #"<<lift->m_liftID<<"减速\n";
+			output_time(os<<"[",time)<<"]\t电梯 #"<<lift->m_liftID<<"减速\n\n";
 			lift->m_direction=-2;
 			event_queue.push<event_change_direction>(time+constant::lift_down_last_extra_tick,lift,-1);
 		}
@@ -242,7 +240,7 @@ void event_check_lift_state::call(std::ostream &os)const
 		else if(lift->is_called_up())
 		{
 			lift->m_waiting_floor=-1;
-			os<<"电梯 #"<<lift->m_liftID<<"减速\n";
+			output_time(os<<"[",time)<<"]\t电梯 #"<<lift->m_liftID<<"减速\n\n";
 			lift->m_direction=-2;
 			event_queue.push<event_change_direction>(time+constant::lift_down_last_extra_tick,lift,1);
 		}
@@ -255,7 +253,7 @@ void event_check_lift_state::call(std::ostream &os)const
 			//FIXME: constants.h中已指出，lift_down_last_extra_tick并不完全是由减速
 			//引起的，其中还包含了开门的准备时间，而此时，电梯的减速并不是为开门做准备，所以
 			//lift_down_last_extra_tick长于实际用时
-			os<<"电梯 #"<<lift->m_liftID<<"减速\n";
+			output_time(os<<"[",time)<<"]\t电梯 #"<<lift->m_liftID<<"减速\n\n";
 			lift->m_direction=-2;
 			event_queue.push<event_change_direction>(time+constant::lift_down_last_extra_tick,lift,1);
 		}
@@ -265,7 +263,7 @@ void event_check_lift_state::call(std::ostream &os)const
 			assert(constant::waiting_floor[lift->m_waiting_floor]<=lift->m_floor);
 			if(constant::waiting_floor[lift->m_waiting_floor]==lift->m_floor)
 			{
-				os<<"电梯 #"<<std::to_string(lift->m_liftID)<<"到达待命楼层.\n";
+				os<<"电梯 #"<<lift->m_liftID<<"到达待命楼层.\n";
 				lift->m_direction=-2;
 				event_queue.push<event_change_direction>(time+constant::lift_down_last_extra_tick,lift,0);
 			}
@@ -281,7 +279,7 @@ void event_check_lift_state::call(std::ostream &os)const
 			||lift->is_pressed())
 		{
 			lift->m_waiting_floor=-1;
-			os<<"电梯 #"<<lift->m_liftID<<"减速\n";
+			output_time(os<<"[",time)<<"]\t电梯 #"<<lift->m_liftID<<"减速\n\n";
 			lift->m_direction=2;
 			event_queue.push<event_change_direction>(time+constant::lift_up_last_extra_tick,lift,1);
 		}
@@ -296,7 +294,7 @@ void event_check_lift_state::call(std::ostream &os)const
 		else if(lift->is_called_down())
 		{
 			lift->m_waiting_floor=-1;
-			os<<"电梯 #"<<lift->m_liftID<<"减速\n";
+			output_time(os<<"[",time)<<"]\t电梯 #"<<lift->m_liftID<<"减速\n\n";
 			lift->m_direction=2;
 			event_queue.push<event_change_direction>(time+constant::lift_up_last_extra_tick,lift,-1);
 		}
@@ -307,7 +305,7 @@ void event_check_lift_state::call(std::ostream &os)const
 			//assert(lift->m_waiting_floor!=-1);
 			lift->m_waiting_floor=-1;
 			//FIXME
-			os<<"电梯 #"<<lift->m_liftID<<"减速\n";
+			output_time(os<<"[",time)<<"]\t电梯 #"<<lift->m_liftID<<"减速\n\n";
 			lift->m_direction=2;
 			event_queue.push<event_change_direction>(time+constant::lift_up_last_extra_tick,lift,-1);
 		}
@@ -317,7 +315,7 @@ void event_check_lift_state::call(std::ostream &os)const
 			assert(constant::waiting_floor[lift->m_waiting_floor]>=lift->m_floor);
 			if(constant::waiting_floor[lift->m_waiting_floor]==lift->m_floor)
 			{
-				os<<"电梯 #"<<std::to_string(lift->m_liftID)<<"到达待命楼层.\n";
+				os<<"电梯 #"<<lift->m_liftID<<"到达待命楼层.\n";
 				lift->m_direction=2;
 				event_queue.push<event_change_direction>(time+constant::lift_up_last_extra_tick,lift,0);
 			}
@@ -331,16 +329,16 @@ void event_check_lift_state::call(std::ostream &os)const
 		assert(lift->m_waiting_floor==-1);
 		if(lift->m_is_door_open==2)
 		{
-			if(lift->m_passengers[lift->m_floor-constant::min_floor].size())
+			if(lift->m_passengers[lift->m_floor].size())
 				event_queue.push<event_passenger_out>(time+rand_between(constant::iolift_tick_range),lift);
-			else if(variable::waiting_queues_down[lift->m_floor-constant::min_floor].size())
+			else if(variable::waiting_queues_down[lift->m_floor].size())
 			{
-				auto &pass=variable::waiting_queues_down[lift->m_floor-constant::min_floor].front();
+				auto &pass=variable::waiting_queues_down[lift->m_floor].front();
 				//乘客已等待超时
 				if(pass.appear_time+pass.tolerance_time<time)
 				{
 					event_queue.push<event_passenger_walk>(pass.appear_time+pass.tolerance_time,pass);
-					variable::waiting_queues_down[lift->m_floor-constant::min_floor].pop();
+					variable::waiting_queues_down[lift->m_floor].pop();
 					event_queue.push<event_check_lift_state>(time,lift);
 				}
 				//电梯没有满员
@@ -381,7 +379,7 @@ void event_check_lift_state::call(std::ostream &os)const
 		else if(lift->is_called_down_lower()||lift->is_called_up_lower()||
 			lift->is_pressed_lower())
 		{
-			os<<"电梯 #"<<lift->m_liftID<<"加速\n";
+			output_time(os<<"[",time)<<"]\t电梯 #"<<lift->m_liftID<<"加速\n\n";
 			lift->m_direction=-2;
 			event_queue.push<event_change_direction>(time+constant::lift_down_first_extra_tick,lift,-3);
 		}
@@ -396,7 +394,7 @@ void event_check_lift_state::call(std::ostream &os)const
 		else if(lift->is_called_down_upper()||lift->is_called_up_upper()||
 			lift->is_pressed_upper())
 		{
-			os<<"电梯 #"<<lift->m_liftID<<"加速\n";
+			output_time(os<<"[",time)<<"]\t电梯 #"<<lift->m_liftID<<"加速\n\n";
 			lift->m_direction=2;
 			event_queue.push<event_change_direction>(time+constant::lift_up_first_extra_tick,lift,3);
 		}
@@ -412,16 +410,16 @@ void event_check_lift_state::call(std::ostream &os)const
 		assert(lift->m_waiting_floor==-1);
 		if(lift->m_is_door_open==2)
 		{
-			if(lift->m_passengers[lift->m_floor-constant::min_floor].size())
+			if(lift->m_passengers[lift->m_floor].size())
 				event_queue.push<event_passenger_out>(time+rand_between(constant::iolift_tick_range),lift);
-			else if(variable::waiting_queues_up[lift->m_floor-constant::min_floor].size())
+			else if(variable::waiting_queues_up[lift->m_floor].size())
 			{
-				auto &pass=variable::waiting_queues_up[lift->m_floor-constant::min_floor].front();
+				auto &pass=variable::waiting_queues_up[lift->m_floor].front();
 				//乘客已等待超时
 				if(pass.appear_time+pass.tolerance_time<time)
 				{
 					event_queue.push<event_passenger_walk>(pass.appear_time+pass.tolerance_time,pass);
-					variable::waiting_queues_up[lift->m_floor-constant::min_floor].pop();
+					variable::waiting_queues_up[lift->m_floor].pop();
 					event_queue.push<event_check_lift_state>(time,lift);
 				}
 				//电梯没有满员
@@ -463,7 +461,7 @@ void event_check_lift_state::call(std::ostream &os)const
 		else if(lift->is_called_down_upper()||lift->is_called_up_upper()||
 			lift->is_pressed_upper())
 		{
-			os<<"电梯 #"<<lift->m_liftID<<"加速\n";
+			output_time(os<<"[",time)<<"]\t电梯 #"<<lift->m_liftID<<"加速\n\n";
 			lift->m_direction=2;
 			event_queue.push<event_change_direction>(time+constant::lift_up_first_extra_tick,lift,3);
 		}
@@ -478,7 +476,7 @@ void event_check_lift_state::call(std::ostream &os)const
 		else if(lift->is_called_down_lower()||lift->is_called_up_lower()||
 			lift->is_pressed_lower())
 		{
-			os<<"电梯 #"<<lift->m_liftID<<"加速\n";
+			output_time(os<<"[",time)<<"]\t电梯 #"<<lift->m_liftID<<"加速\n\n";
 			lift->m_direction=-2;
 			event_queue.push<event_change_direction>(time+constant::lift_down_first_extra_tick,lift,-3);
 		}
@@ -513,7 +511,7 @@ void event_check_lift_state::call(std::ostream &os)const
 		else if(lift->is_called_down_lower()||lift->is_called_up_lower())
 		{
 			lift->m_waiting_floor=-1;
-			os<<"电梯 #"<<lift->m_liftID<<"加速\n";
+			output_time(os<<"[",time)<<"]\t电梯 #"<<lift->m_liftID<<"加速\n\n";
 			if(!(lift->is_called_down_upper()||lift->is_called_up_upper())||rand_between(0,1))
 			{
 				lift->m_direction=-2;
@@ -529,7 +527,7 @@ void event_check_lift_state::call(std::ostream &os)const
 		else if(lift->is_called_down_upper()||lift->is_called_up_upper())
 		{
 			lift->m_waiting_floor=-1;
-			os<<"电梯 #"<<lift->m_liftID<<"加速\n";
+			output_time(os<<"[",time)<<"]\t电梯 #"<<lift->m_liftID<<"加速\n\n";
 			lift->m_direction=2;
 			event_queue.push<event_change_direction>(time+constant::lift_up_first_extra_tick,lift,3);
 		}
@@ -552,13 +550,13 @@ void event_check_lift_state::call(std::ostream &os)const
 				}
 				if(constant::waiting_floor[lift->m_waiting_floor]<lift->m_floor)
 				{
-					os<<"电梯 #"<<std::to_string(lift->m_liftID)<<"前往待命楼层.\n";
+					os<<"电梯 #"<<lift->m_liftID<<"前往待命楼层.\n";
 					lift->m_direction=-2;
 					event_queue.push<event_change_direction>(time+constant::lift_down_first_extra_tick,lift,-3);
 				}
 				else if(constant::waiting_floor[lift->m_waiting_floor]>lift->m_floor)
 				{
-					os<<"电梯 #"<<std::to_string(lift->m_liftID)<<"前往待命楼层.\n";
+					os<<"电梯 #"<<lift->m_liftID<<"前往待命楼层.\n";
 					lift->m_direction=2;
 					event_queue.push<event_change_direction>(time+constant::lift_up_first_extra_tick,lift,3);
 				}
@@ -570,7 +568,7 @@ void event_check_lift_state::call(std::ostream &os)const
 }
 
 event_arrive_at::event_arrive_at(uint64_t time,lift_t *which_lift,int16_t floor):
-	event_t(time,"电梯 #"+std::to_string(which_lift->m_liftID)+"到达 "+std::to_string(floor)+" 层",
+	event_t(time,"电梯 #"+std::to_string(which_lift->m_liftID)+"到达 "+constant::floor_name[floor]+" 层",
 	std::to_string(which_lift->m_liftID)+"arrive_at"+std::to_string(floor)),
 	lift(which_lift),floor(floor){}
 
@@ -607,12 +605,13 @@ event_passenger_out::event_passenger_out(uint64_t time,lift_t *which_lift):
 
 void event_passenger_out::call(std::ostream &os)const
 {
-	auto pass=lift->m_passengers[lift->m_floor-constant::min_floor].front();
-	lift->m_passengers[lift->m_floor-constant::min_floor].pop();
+	auto pass=lift->m_passengers[lift->m_floor].front();
+	lift->m_passengers[lift->m_floor].pop();
 	lift->m_carrying_weight-=pass.weight;
-	os<<"乘客信息: #"<<pass.ID<<", "<<pass.source<<"->"<<pass.destination<<", "<<pass.weight<<"kg\n";
+	os<<"乘客信息: #"<<pass.ID<<", "<<constant::floor_name[pass.source]<<"→"
+	<<constant::floor_name[pass.destination]<<", "<<pass.weight<<"kg\n";
 	pass.arrive_time=time;
-	if(lift->m_passengers[lift->m_floor-constant::min_floor].empty())
+	if(lift->m_passengers[lift->m_floor].empty())
 		lift->m_begin_no_passenger_time=time;
 	variable::event_queue.push<event_passenger_arrive>(pass,true);
 	variable::event_queue.push<event_check_lift_state>(time,lift);
@@ -628,22 +627,24 @@ void event_passenger_in::call(std::ostream &os)const
 	{
 		if(dire>0)
 		{
-			auto &pass=variable::waiting_queues_up[lift->m_floor-constant::min_floor].front();
+			auto &pass=variable::waiting_queues_up[lift->m_floor].front();
 			pass.depart_time=time;
-			os<<"乘客信息: #"<<pass.ID<<", "<<pass.source<<"->"<<pass.destination<<", "<<pass.weight<<"kg\n";
+			os<<"乘客信息: #"<<pass.ID<<", "<<constant::floor_name[pass.source]<<"→"
+			<<constant::floor_name[pass.destination]<<", "<<pass.weight<<"kg\n";
 			lift->m_carrying_weight+=pass.weight;
-			lift->m_passengers[pass.destination-constant::min_floor].push(pass);
+			lift->m_passengers[pass.destination].push(pass);
 			//把乘客按电梯内的楼层按钮的时间也算在进入电梯的时间中，故直接用time
 			lift->add_pressed_button(time,pass.destination);
 			variable::waiting_queues_up[lift->m_floor].pop();
 		}
 		else
 		{
-			auto &pass=variable::waiting_queues_down[lift->m_floor-constant::min_floor].front();
+			auto &pass=variable::waiting_queues_down[lift->m_floor].front();
 			pass.depart_time=time;
-			os<<"乘客信息: #"<<pass.ID<<", "<<pass.source<<"->"<<pass.destination<<", "<<pass.weight<<"kg\n";
+			os<<"乘客信息: #"<<pass.ID<<", "<<constant::floor_name[pass.source]<<"→"
+			<<constant::floor_name[pass.destination]<<", "<<pass.weight<<"kg\n";
 			lift->m_carrying_weight+=pass.weight;
-			lift->m_passengers[pass.destination-constant::min_floor].push(pass);
+			lift->m_passengers[pass.destination].push(pass);
 			lift->add_pressed_button(time,pass.destination);
 			variable::waiting_queues_down[lift->m_floor].pop();
 		}
