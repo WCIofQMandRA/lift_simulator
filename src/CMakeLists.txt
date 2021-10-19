@@ -9,6 +9,7 @@ add_executable(lift_simulator ${SRC_LIFT})
 #target_link_libraries(lift_simulator ${gtkmm_LDFLAGS})
 
 set_target_properties(lift_simulator PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
-set_target_properties(lift_simulator PROPERTIES INSTALL_RPATH "\$ORIGIN/lib")
+set_target_properties(lift_simulator PROPERTIES INSTALL_RPATH "\$ORIGIN/../lib")
+file(COPY ${CMAKE_CURRENT_LIST_DIR}/constants.ini DESTINATION ${OUTPUT_DIR}/etc/lift_simulator)
 
-set_property(TARGET lift_simulator PROPERTY RUNTIME_OUTPUT_DIRECTORY $<1:${OUTPUT_DIR}>)
+set_property(TARGET lift_simulator PROPERTY RUNTIME_OUTPUT_DIRECTORY $<1:${OUTPUT_DIR}/bin>)

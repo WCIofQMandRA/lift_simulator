@@ -33,7 +33,7 @@ static void load_constants()
 	using namespace constant;
 	zzc::ini_parser parser;
 	char *exepath=realpath("/proc/self/exe",nullptr);
-	std::ifstream fin(fs::u8path(exepath).parent_path()/"constants.ini");
+	std::ifstream fin(fs::u8path(exepath).parent_path().parent_path()/"etc/lift_simulator/constants.ini");
 	free(exepath);
 #define ADD_OP_IMPL(x) (parser.add_key<decltype(x)>(#x))
 	FOR_EACH_II(ADD_OP_IMPL,;,OPTION_LIST);
