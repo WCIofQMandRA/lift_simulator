@@ -7,7 +7,6 @@ namespace zzc
 {
 void ini_parser::load(std::istream &is)
 {
-    //TODO
     std::string key,value,section_name;
     int ch;
     size_t line=0;
@@ -109,6 +108,7 @@ void ini_parser::load(std::istream &is)
                 while(is&&ch!='\n')ch=is.get();
             }
         }
+        if(section_name.size())key=section_name+"."+key;
         auto &option=m_options.at(key);
         option.second->parse(option.first,value);
     }

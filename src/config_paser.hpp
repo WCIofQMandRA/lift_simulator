@@ -5,10 +5,10 @@
 #include <any>
 #include <string>
 #include <memory>
-#include <map>
 #include <stdexcept>
 #include <sstream>
 #include <vector>
+#include "splay_tree.hpp"
 
 namespace zzc
 {
@@ -96,6 +96,6 @@ public:
         value=std::any_cast<T>(m_options.at(key).first);
     }
 private:
-    std::map<std::string,std::pair<std::any,std::unique_ptr<converters::converter_base>>> m_options;
+    zzc::splay_tree<std::string,std::pair<std::any,std::unique_ptr<converters::converter_base>>> m_options;
 };
 }
