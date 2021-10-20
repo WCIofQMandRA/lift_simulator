@@ -3,83 +3,35 @@
 //This file is part of the 电梯模拟器.
 #include "constants.hpp"
 
-#if 0
 namespace constant
 {
-double tick_time=0.1;//一个基本时间单位的长度
-std::pair<uint64_t,uint64_t> iolift_tick_range={5,30};//人进出电梯的时间
-uint64_t ocdoor_tick=25;//电梯开关门的时间
-uint64_t press_close_extra_tick=31;//从按关门键到开始关门的时间
-//无人进出而自动关门的时间
-//在实际测量时差异很大：
-//当来自电梯内的请求使电梯开门且只出来一个人时，为111
-//当来自电梯内的请求使电梯开门且出来多个人时，为30
-//当来自电梯外的请求使电梯开门且无人进出时，为48
-//为了简便，姑且取35
-uint64_t auto_close_door_tick=35;
-uint64_t return_waiting_floor_tick=330;//回到待命层的时间
-uint64_t lift_up_tick=21;//电梯向上移动一层的时间
-uint64_t lift_down_tick=21;//电梯向下移动一层的时间
-uint64_t lift_up_first_extra_tick=32;//向上移动的首层的额外时间（电梯加速需要时间）
-uint64_t lift_up_last_extra_tick=55;//向上移动的末层的额外时间（似乎并不是完全由减速引起的，电梯停稳后过了一会儿才开门）
-uint64_t lift_down_first_extra_tick=32;//向下移动的首层的额外时间
-uint64_t lift_down_last_extra_tick=55;//向下移动的末层的额外时间
-std::pair<uint64_t,uint64_t> walk_up_tick_range={99,150};//走楼梯上一层楼的时间
-std::pair<uint64_t,uint64_t> walk_down_tick_range={80,132};//走楼梯下一层楼的时间
-std::pair<uint64_t,uint64_t> walk_up_fl_extra={10,50};//上楼时，从楼梯口走到楼梯和从楼梯走到楼梯口的额外时间
-std::pair<uint64_t,uint64_t> walk_down_fl_extra={20,45};
-std::pair<double,double> tolerance_tick_rate_range={0.6,1.2};//等待电梯的忍耐时间与走楼梯前往目标楼层的时间的比
-uint64_t min_take_lift_up=4;//上楼时，选择乘坐电梯的最小楼层差
-uint64_t min_take_lift_down=5;//下楼时，选择乘坐电梯的最小楼层差
-uint64_t press_button_tick=10;//乘客从按下呼叫电梯的按钮的耗时
-
-int16_t n_floors=13,base_floor=1;
-zzc::vector<std::string> floor_name=
-{"-1","1","2","3","4","5","6","7","8","9","10","11","12"};
-int16_t waiting_floor[2]={1,7};//待命楼层, 按优先级从高到低排序
-std::pair<double,double> passenger_weight_range={40,80};//乘客质量
-std::pair<int,int> passenger_number_range={2800,4000};//一天进出楼的人数
-std::pair<uint64_t,uint64_t> take_lift_time={216000,828000};//一天内有人坐电梯的时段
-
-double full_weight=1000;//电梯显示满员时的载重量
-}
-#else
-namespace constant
-{
-double tick_time;//一个基本时间单位的长度
-std::pair<uint64_t,uint64_t> iolift_tick_range;//人进出电梯的时间
-uint64_t ocdoor_tick;//电梯开关门的时间
-uint64_t press_close_extra_tick;//从按关门键到开始关门的时间
-//无人进出而自动关门的时间
-//在实际测量时差异很大：
-//当来自电梯内的请求使电梯开门且只出来一个人时，为111
-//当来自电梯内的请求使电梯开门且出来多个人时，为30
-//当来自电梯外的请求使电梯开门且无人进出时，为48
-//为了简便，姑且取35
+double tick_time;
+std::pair<uint64_t,uint64_t> iolift_tick_range;
+uint64_t ocdoor_tick;
+uint64_t press_close_extra_tick;
 uint64_t auto_close_door_tick;
-uint64_t return_waiting_floor_tick;//回到待命层的时间
-uint64_t lift_up_tick;//电梯向上移动一层的时间
-uint64_t lift_down_tick;//电梯向下移动一层的时间
-uint64_t lift_up_first_extra_tick;//向上移动的首层的额外时间（电梯加速需要时间）
-uint64_t lift_up_last_extra_tick;//向上移动的末层的额外时间（似乎并不是完全由减速引起的，电梯停稳后过了一会儿才开门）
-uint64_t lift_down_first_extra_tick;//向下移动的首层的额外时间
-uint64_t lift_down_last_extra_tick;//向下移动的末层的额外时间
-std::pair<uint64_t,uint64_t> walk_up_tick_range;//走楼梯上一层楼的时间
-std::pair<uint64_t,uint64_t> walk_down_tick_range;//走楼梯下一层楼的时间
-std::pair<uint64_t,uint64_t> walk_up_fl_extra;//上楼时，从楼梯口走到楼梯和从楼梯走到楼梯口的额外时间
+uint64_t return_waiting_floor_tick;
+uint64_t lift_up_tick;
+uint64_t lift_down_tick;
+uint64_t lift_up_first_extra_tick;
+uint64_t lift_up_last_extra_tick;
+uint64_t lift_down_first_extra_tick;
+uint64_t lift_down_last_extra_tick;
+std::pair<uint64_t,uint64_t> walk_up_tick_range;
+std::pair<uint64_t,uint64_t> walk_down_tick_range;
+std::pair<uint64_t,uint64_t> walk_up_fl_extra;
 std::pair<uint64_t,uint64_t> walk_down_fl_extra;
-std::pair<double,double> tolerance_tick_rate_range;//等待电梯的忍耐时间与走楼梯前往目标楼层的时间的比
-uint64_t min_take_lift_up;//上楼时，选择乘坐电梯的最小楼层差
-uint64_t min_take_lift_down;//下楼时，选择乘坐电梯的最小楼层差
-uint64_t press_button_tick;//乘客从按下呼叫电梯的按钮的耗时
+std::pair<double,double> tolerance_tick_rate_range;
+uint64_t min_take_lift_up;
+uint64_t min_take_lift_down;
+uint64_t press_button_tick;
 
 int16_t n_floors,base_floor;
 zzc::vector<std::string> floor_name;
-zzc::vector<int16_t> waiting_floor;//待命楼层, 按优先级从高到低排序
-std::pair<double,double> passenger_weight_range;//乘客质量
-std::pair<int,int> passenger_number_range;//一天进出楼的人数
-std::pair<uint64_t,uint64_t> take_lift_time;//一天内有人坐电梯的时段
+zzc::vector<int16_t> waiting_floor;
+std::pair<double,double> passenger_weight_range;
+std::pair<int,int> passenger_number_range;
+std::pair<uint64_t,uint64_t> take_lift_time;
 
-double full_weight;//电梯显示满员时的载重量
+double full_weight;
 }
-#endif
