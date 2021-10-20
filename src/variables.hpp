@@ -11,7 +11,7 @@ namespace variable
 {
 extern event_queue_t event_queue;		                //事件队列
 //在每层楼的电梯口的排队的人
-extern std::vector<zzc::queue<passenger_t>> waiting_queues_up,waiting_queues_down;
+extern zzc::vector<zzc::queue<passenger_t>> waiting_queues_up,waiting_queues_down;
 extern wbutton_t wall_buttons;			                //每层楼墙上的按钮
 extern std::array<lift_t,2> lifts;		                //两部电梯
 }

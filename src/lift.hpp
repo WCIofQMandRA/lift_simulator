@@ -151,7 +151,7 @@ private:
 	double m_carrying_weight=0;//载的乘客的质量
 	uint64_t m_pressed_button=0;//按下的楼层按钮
 	uint64_t m_called_down_floor=0,m_called_up_floor=0;//呼叫电梯的楼层
-	std::vector<zzc::queue<passenger_t>> m_passengers;//电梯内的乘客
+	zzc::vector<zzc::queue<passenger_t>> m_passengers;//电梯内的乘客
 };
 
 //按下墙上的按钮

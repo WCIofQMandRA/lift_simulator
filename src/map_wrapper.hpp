@@ -77,11 +77,11 @@ public:
         x.swap(y);
     }
 private:
-	inline void my_delete(Node *x)
-	{
-		std::allocator_traits<Alloc>::destroy(alloc,x);
-		std::allocator_traits<Alloc>::deallocate(alloc,x,1);
-	}
+    inline void my_delete(Node *x)
+    {
+        std::allocator_traits<Alloc>::destroy(alloc,x);
+        std::allocator_traits<Alloc>::deallocate(alloc,x,1);
+    }
     __node_type_map(Node *real_node,const Alloc &alloc=Alloc()):
         real_node(real_node),alloc(alloc){}
     Node *real_node;
@@ -110,18 +110,18 @@ class tree_map_wrapper
     using Node=typename Impl::Node;
 //成员类型
 public:
-	using key_type=Key;
-	using mapped_type=T;
-	using value_type=std::pair<const Key,T>;
-	using size_type=std::size_t;
-	using difference_type=std::ptrdiff_t;
-	using key_compare=Cmp;
-	using allocator_type=typename std::allocator_traits<Alloc>::template rebind_alloc<Node>;
-	using reference=value_type&;
-	using const_reference=const value_type&;
-	using pointer=typename std::allocator_traits<Alloc>::pointer;
-	using const_pointer=typename std::allocator_traits<Alloc>::const_pointer;
-	using node_type=__node_type_map<Node,Alloc,tree_map_wrapper>;
+    using key_type=Key;
+    using mapped_type=T;
+    using value_type=std::pair<const Key,T>;
+    using size_type=std::size_t;
+    using difference_type=std::ptrdiff_t;
+    using key_compare=Cmp;
+    using allocator_type=typename std::allocator_traits<Alloc>::template rebind_alloc<Node>;
+    using reference=value_type&;
+    using const_reference=const value_type&;
+    using pointer=typename std::allocator_traits<Alloc>::pointer;
+    using const_pointer=typename std::allocator_traits<Alloc>::const_pointer;
+    using node_type=__node_type_map<Node,Alloc,tree_map_wrapper>;
 
     class value_compare
     {
@@ -180,247 +180,247 @@ public:
     private:
         Cmp cmp;
     };
-	
+    
 //迭代器
 public:
     class const_iterator;
-	//遗留随机访问迭代器 LegacyRandomAccessIterator
-	class iterator
-	{
-		using self_type=iterator;
-		friend class tree_map_wrapper;
+    //遗留随机访问迭代器 LegacyRandomAccessIterator
+    class iterator
+    {
+        using self_type=iterator;
+        friend class tree_map_wrapper;
         friend class const_iterator;
-	public:
-		using iterator_category=std::random_access_iterator_tag;
-		using value_type=std::pair<const Key,T>;
-		using difference_type=std::ptrdiff_t;
-		using pointer=value_type*;
-		using reference=value_type&;
+    public:
+        using iterator_category=std::random_access_iterator_tag;
+        using value_type=std::pair<const Key,T>;
+        using difference_type=std::ptrdiff_t;
+        using pointer=value_type*;
+        using reference=value_type&;
 
-		iterator()=default;
-		reference operator*()const noexcept{return node->data;}
-		pointer operator->()const noexcept{return &node->data;}
-		bool operator==(self_type other)const noexcept{return node==other.node;}
-		bool operator!=(self_type other)const noexcept{return node!=other.node;}
-		
-		self_type& operator++()noexcept
-		{
-			node=Impl::successor(node);
-			return *this;
-		}
-		self_type operator++(int)noexcept
-		{
-			auto tmp=*this;
-			node=Impl::successor(node);
-			return tmp;
-		}
-		self_type& operator--()noexcept
-		{
-			node=Impl::predecessor(node);
-			return *this;
-		}
-		self_type operator--(int)noexcept
-		{
-			auto tmp=*this;
-			node=Impl::predecessor(node);
-			return tmp;
-		}
-		
-		self_type& operator+=(difference_type n)noexcept
-		{
-			size_type i=Impl::rank(node)+n;
-			node=Impl::select(root,i);
-			return *this;
-		}
-		self_type operator+(difference_type n)const noexcept
-		{
-			auto x=*this;
-			return x+=n;
-		}
-		friend self_type operator+(difference_type n,self_type x)noexcept
-		{
-			return x+=n;
-		}
-		self_type& operator-=(difference_type n)noexcept
-		{
-			size_type i=Impl::rank(node)-n;
-			node=Impl::select(root,i);
-			return *this;
-		}
-		self_type operator-(difference_type n)const noexcept
-		{
-			auto x=*this;
-			return x-=n;
-		}
-		difference_type operator-(self_type other)const noexcept
-		{
-			return static_cast<difference_type>(Impl::rank(node)-Impl::rank(other.node));
-		}
-		const value_type& operator[](size_type n)const noexcept
-		{
-			return *(*this+n);
-		}
+        iterator()=default;
+        reference operator*()const noexcept{return node->data;}
+        pointer operator->()const noexcept{return &node->data;}
+        bool operator==(self_type other)const noexcept{return node==other.node;}
+        bool operator!=(self_type other)const noexcept{return node!=other.node;}
+        
+        self_type& operator++()noexcept
+        {
+            node=Impl::successor(node);
+            return *this;
+        }
+        self_type operator++(int)noexcept
+        {
+            auto tmp=*this;
+            node=Impl::successor(node);
+            return tmp;
+        }
+        self_type& operator--()noexcept
+        {
+            node=Impl::predecessor(node);
+            return *this;
+        }
+        self_type operator--(int)noexcept
+        {
+            auto tmp=*this;
+            node=Impl::predecessor(node);
+            return tmp;
+        }
+        
+        self_type& operator+=(difference_type n)noexcept
+        {
+            size_type i=Impl::rank(node)+n;
+            node=Impl::select(root,i);
+            return *this;
+        }
+        self_type operator+(difference_type n)const noexcept
+        {
+            auto x=*this;
+            return x+=n;
+        }
+        friend self_type operator+(difference_type n,self_type x)noexcept
+        {
+            return x+=n;
+        }
+        self_type& operator-=(difference_type n)noexcept
+        {
+            size_type i=Impl::rank(node)-n;
+            node=Impl::select(root,i);
+            return *this;
+        }
+        self_type operator-(difference_type n)const noexcept
+        {
+            auto x=*this;
+            return x-=n;
+        }
+        difference_type operator-(self_type other)const noexcept
+        {
+            return static_cast<difference_type>(Impl::rank(node)-Impl::rank(other.node));
+        }
+        reference operator[](size_type n)const noexcept
+        {
+            return *(*this+n);
+        }
 
-		bool operator<(self_type other)const noexcept{return Impl::rank(node)<Impl::rank(other.node);}
-		bool operator>(self_type other)const noexcept{return Impl::rank(node)>Impl::rank(other.node);}
-		bool operator<=(self_type other)const noexcept{return Impl::rank(node)<=Impl::rank(other.node);}
-		bool operator>=(self_type other)const noexcept{return Impl::rank(node)>=Impl::rank(other.node);}
-	private:
-		Node *node=nullptr, *root=nullptr;
-		iterator(Node *p,Node *root):node(p),root(root){}
-	};
+        bool operator<(self_type other)const noexcept{return Impl::rank(node)<Impl::rank(other.node);}
+        bool operator>(self_type other)const noexcept{return Impl::rank(node)>Impl::rank(other.node);}
+        bool operator<=(self_type other)const noexcept{return Impl::rank(node)<=Impl::rank(other.node);}
+        bool operator>=(self_type other)const noexcept{return Impl::rank(node)>=Impl::rank(other.node);}
+    private:
+        Node *node=nullptr, *root=nullptr;
+        iterator(Node *p,Node *root):node(p),root(root){}
+    };
     class const_iterator
-	{
-		using self_type=const_iterator;
-		friend class tree_map_wrapper;
-	public:
-		using iterator_category=std::random_access_iterator_tag;
-		using value_type=std::pair<const Key,T>;
-		using difference_type=std::ptrdiff_t;
-		using pointer=const value_type*;
-		using reference=const value_type&;
+    {
+        using self_type=const_iterator;
+        friend class tree_map_wrapper;
+    public:
+        using iterator_category=std::random_access_iterator_tag;
+        using value_type=std::pair<const Key,T>;
+        using difference_type=std::ptrdiff_t;
+        using pointer=const value_type*;
+        using reference=const value_type&;
 
-		const_iterator()=default;
+        const_iterator()=default;
         const_iterator(const iterator &it):
             node(it.node),root(it.root){}
-		reference operator*()const noexcept{return node->data;}
-		pointer operator->()const noexcept{return &node->data;}
-		bool operator==(self_type other)const noexcept{return node==other.node;}
-		bool operator!=(self_type other)const noexcept{return node!=other.node;}
-		
-		self_type& operator++()noexcept
-		{
-			node=Impl::successor(node);
-			return *this;
-		}
-		self_type operator++(int)noexcept
-		{
-			auto tmp=*this;
-			node=Impl::successor(node);
-			return tmp;
-		}
-		self_type& operator--()noexcept
-		{
-			node=Impl::predecessor(node);
-			return *this;
-		}
-		self_type operator--(int)noexcept
-		{
-			auto tmp=*this;
-			node=Impl::predecessor(node);
-			return tmp;
-		}
-		
-		self_type& operator+=(difference_type n)noexcept
-		{
-			size_type i=Impl::rank(node)+n;
-			node=Impl::select(root,i);
-			return *this;
-		}
-		self_type operator+(difference_type n)const noexcept
-		{
-			auto x=*this;
-			return x+=n;
-		}
-		friend self_type operator+(difference_type n,self_type x)noexcept
-		{
-			return x+=n;
-		}
-		self_type& operator-=(difference_type n)noexcept
-		{
-			size_type i=Impl::rank(node)-n;
-			node=Impl::select(root,i);
-			return *this;
-		}
-		self_type operator-(difference_type n)const noexcept
-		{
-			auto x=*this;
-			return x-=n;
-		}
-		difference_type operator-(self_type other)const noexcept
-		{
-			return static_cast<difference_type>(Impl::rank(node)-Impl::rank(other.node));
-		}
-		const value_type& operator[](size_type n)const noexcept
-		{
-			return *(*this+n);
-		}
+        reference operator*()const noexcept{return node->data;}
+        pointer operator->()const noexcept{return &node->data;}
+        bool operator==(self_type other)const noexcept{return node==other.node;}
+        bool operator!=(self_type other)const noexcept{return node!=other.node;}
+        
+        self_type& operator++()noexcept
+        {
+            node=Impl::successor(node);
+            return *this;
+        }
+        self_type operator++(int)noexcept
+        {
+            auto tmp=*this;
+            node=Impl::successor(node);
+            return tmp;
+        }
+        self_type& operator--()noexcept
+        {
+            node=Impl::predecessor(node);
+            return *this;
+        }
+        self_type operator--(int)noexcept
+        {
+            auto tmp=*this;
+            node=Impl::predecessor(node);
+            return tmp;
+        }
+        
+        self_type& operator+=(difference_type n)noexcept
+        {
+            size_type i=Impl::rank(node)+n;
+            node=Impl::select(root,i);
+            return *this;
+        }
+        self_type operator+(difference_type n)const noexcept
+        {
+            auto x=*this;
+            return x+=n;
+        }
+        friend self_type operator+(difference_type n,self_type x)noexcept
+        {
+            return x+=n;
+        }
+        self_type& operator-=(difference_type n)noexcept
+        {
+            size_type i=Impl::rank(node)-n;
+            node=Impl::select(root,i);
+            return *this;
+        }
+        self_type operator-(difference_type n)const noexcept
+        {
+            auto x=*this;
+            return x-=n;
+        }
+        difference_type operator-(self_type other)const noexcept
+        {
+            return static_cast<difference_type>(Impl::rank(node)-Impl::rank(other.node));
+        }
+        reference operator[](size_type n)const noexcept
+        {
+            return *(*this+n);
+        }
 
-		bool operator<(self_type other)const noexcept{return Impl::rank(node)<Impl::rank(other.node);}
-		bool operator>(self_type other)const noexcept{return Impl::rank(node)>Impl::rank(other.node);}
-		bool operator<=(self_type other)const noexcept{return Impl::rank(node)<=Impl::rank(other.node);}
-		bool operator>=(self_type other)const noexcept{return Impl::rank(node)>=Impl::rank(other.node);}
-	private:
-		Node *node=nullptr, *root=nullptr;
-		const_iterator(Node *p,Node *root):node(p),root(root){}
-	};
-	using reverse_iterator=std::reverse_iterator<iterator>;
-	using const_reverse_iterator=std::reverse_iterator<const_iterator>;
+        bool operator<(self_type other)const noexcept{return Impl::rank(node)<Impl::rank(other.node);}
+        bool operator>(self_type other)const noexcept{return Impl::rank(node)>Impl::rank(other.node);}
+        bool operator<=(self_type other)const noexcept{return Impl::rank(node)<=Impl::rank(other.node);}
+        bool operator>=(self_type other)const noexcept{return Impl::rank(node)>=Impl::rank(other.node);}
+    private:
+        Node *node=nullptr, *root=nullptr;
+        const_iterator(Node *p,Node *root):node(p),root(root){}
+    };
+    using reverse_iterator=std::reverse_iterator<iterator>;
+    using const_reverse_iterator=std::reverse_iterator<const_iterator>;
 
     using insert_return_type=__insert_return_type<iterator,node_type>;
 //构造函数
 public:
     //(1)
-	tree_map_wrapper(){Impl::initalize_root(root);}
+    tree_map_wrapper(){Impl::initalize_root(root);}
     //(1)
-	explicit tree_map_wrapper(const key_compare &comp,const allocator_type &alloc=allocator_type()):
-		cmp(comp),alloc(alloc){Impl::initalize_root(root);}
+    explicit tree_map_wrapper(const key_compare &comp,const allocator_type &alloc=allocator_type()):
+        cmp(comp),alloc(alloc){Impl::initalize_root(root);}
     //(1) C++11起
-	explicit tree_map_wrapper(const allocator_type &alloc):
-		alloc(alloc){Impl::initalize_root(root);}
+    explicit tree_map_wrapper(const allocator_type &alloc):
+        alloc(alloc){Impl::initalize_root(root);}
     //(2)
-	template<typename InputIt>
-	tree_map_wrapper(InputIt first,InputIt last,const key_compare &comp=key_compare(),const allocator_type &alloc=allocator_type()):
-		cmp(comp),alloc(alloc)
-	{
+    template<typename InputIt>
+    tree_map_wrapper(InputIt first,InputIt last,const key_compare &comp=key_compare(),const allocator_type &alloc=allocator_type()):
+        cmp(comp),alloc(alloc)
+    {
         Impl::initalize_root(root);
-		for(auto it=first;it!=last;++it)
-		{
+        for(auto it=first;it!=last;++it)
+        {
             if(auto [pos,dire]=Impl::search2(root,cmp,*it);dire)
             {
                 auto node=my_new(Node::construct_data,*it);
                 Impl::insert(pos,dire,node);
             }
             else Impl::search2_no_insert(pos);
-		}
-	}
+        }
+    }
     //(2) C++14起
-	template<typename InputIt>
-	tree_map_wrapper(InputIt first,InputIt last,const allocator_type &alloc):
-		tree_map_wrapper(first,last,key_compare(),alloc){}
+    template<typename InputIt>
+    tree_map_wrapper(InputIt first,InputIt last,const allocator_type &alloc):
+        tree_map_wrapper(first,last,key_compare(),alloc){}
     //(3)
-	tree_map_wrapper(const tree_map_wrapper &other):
+    tree_map_wrapper(const tree_map_wrapper &other):
         tree_map_wrapper(other,other.alloc){}
     //(3) C++11起
-	tree_map_wrapper(const tree_map_wrapper &other,const allocator_type &alloc):
-		cmp(other.cmp),alloc(alloc)
+    tree_map_wrapper(const tree_map_wrapper &other,const allocator_type &alloc):
+        cmp(other.cmp),alloc(alloc)
     {
         root=copy_subtree(other.root);
     }
     //(4) C++11起
-	tree_map_wrapper(tree_map_wrapper &&other):
+    tree_map_wrapper(tree_map_wrapper &&other):
         cmp(std::move(other.cmp)),alloc(std::move(other.alloc)),root(other.root)
     {
         other.root=other.my_new_raw();
         Impl::initalize_root(other.root);
     }
     //(4) C++11起
-	tree_map_wrapper(tree_map_wrapper &&other,const allocator_type &alloc):
-		cmp(std::move(other.cmp)),alloc(alloc),root(other.root)
+    tree_map_wrapper(tree_map_wrapper &&other,const allocator_type &alloc):
+        cmp(std::move(other.cmp)),alloc(alloc),root(other.root)
     {
         other.root=other.my_new_raw();
         Impl::initalize_root(other.root);
     }
     //(5) C++11起
-	tree_map_wrapper(std::initializer_list<value_type> init,const key_compare &comp=key_compare(),
+    tree_map_wrapper(std::initializer_list<value_type> init,const key_compare &comp=key_compare(),
         const allocator_type &alloc=allocator_type()):
         tree_map_wrapper(init.begin(),init.end(),comp,alloc){}
     //(5) C++14起
-	tree_map_wrapper(std::initializer_list<value_type> init,const allocator_type &alloc):
-		tree_map_wrapper(init.begin(),init.end(),key_compare(),alloc){}
+    tree_map_wrapper(std::initializer_list<value_type> init,const allocator_type &alloc):
+        tree_map_wrapper(init.begin(),init.end(),key_compare(),alloc){}
 //析构函数
 public:
-	~tree_map_wrapper()
+    ~tree_map_wrapper()
     {
         delete_subtree(root->left);
         my_delete_raw(root);
@@ -428,7 +428,7 @@ public:
 //operator=
 public:
     //(1)
-	tree_map_wrapper& operator=(const tree_map_wrapper &other)
+    tree_map_wrapper& operator=(const tree_map_wrapper &other)
     {
         delete_subtree(root->left);
         cmp=other.cmp;
@@ -437,7 +437,7 @@ public:
         return *this;
     }
     //(2) C++17 起
-	tree_map_wrapper& operator=(tree_map_wrapper &&other)
+    tree_map_wrapper& operator=(tree_map_wrapper &&other)
         noexcept(std::allocator_traits<Alloc>::is_always_equal::value
         && std::is_nothrow_move_assignable<Cmp>::value)
     {
@@ -451,108 +451,108 @@ public:
         return *this;
     }
     //(3) C++11 起
-	tree_map_wrapper& operator=(std::initializer_list<value_type> ilist)
-	{
-		delete_subtree(root->left);
+    tree_map_wrapper& operator=(std::initializer_list<value_type> ilist)
+    {
+        delete_subtree(root->left);
         Impl::initalize_root(root);
-		for(auto &i:ilist)
-		{
+        for(auto &i:ilist)
+        {
             if(auto [pos,dire]=Impl::search2(root,cmp,i);dire!=0)
             {
                 auto node=my_new(Node::construct_data,i);
                 insert(pos,dire,node);
             }
             else Impl::search2_no_insert(pos);
-		}
-		return *this;
-	}
+        }
+        return *this;
+    }
 public:
     //(1) C++11起
-	allocator_type get_allocator() const noexcept
-	{
-		return alloc;
-	}
+    allocator_type get_allocator() const noexcept
+    {
+        return alloc;
+    }
 //元素访问
 public:
     //at (1)
-	T& at(const Key &key)
-	{
-		auto p=Impl::search(root,cmp,key);
-		if(!p)throw std::out_of_range("tree_map_wrapper::at()");
-		return p->data.second;
-	}
+    T& at(const Key &key)
+    {
+        auto p=Impl::search(root,cmp,key);
+        if(!p)throw std::out_of_range("tree_map_wrapper::at()");
+        return p->data.second;
+    }
     //at (2)
-	const T& at(const Key &key)const
-	{
-		auto p=Impl::search(root,cmp,key);
-		if(!p)throw std::out_of_range("tree_map_wrapper::at()const");
-		return p->data.second;
-	}
+    const T& at(const Key &key)const
+    {
+        auto p=Impl::search(root,cmp,key);
+        if(!p)throw std::out_of_range("tree_map_wrapper::at()const");
+        return p->data.second;
+    }
     //operator[] (1)
-	T& operator[](const key_type &key)
-	{
-		auto [pos,dire]=Impl::search2(root,cmp,key);
-		if(dire)
-		{
-			auto node=my_new(Node::construct_data,key,T());
+    T& operator[](const key_type &key)
+    {
+        auto [pos,dire]=Impl::search2(root,cmp,key);
+        if(dire)
+        {
+            auto node=my_new(Node::construct_data,key,T());
             Impl::insert(pos,dire,node);
             return node->data.second;
-		}
-        else
-        {
-            Impl::search2_no_insert(pos);
-		    return pos->data.second;
         }
-	}
-    //operator[] (2) C++11 起
-	T& operator[](key_type &&key)
-	{
-		auto [pos,dire]=Impl::search2(root,cmp,key);
-		if(dire)
-		{
-			auto node=my_new(Node::construct_data,std::move(key),T());
-			Impl::insert(pos,dire,node);
-            return node->data.second;
-		}
         else
         {
             Impl::search2_no_insert(pos);
             return pos->data.second;
         }
-	}
+    }
+    //operator[] (2) C++11 起
+    T& operator[](key_type &&key)
+    {
+        auto [pos,dire]=Impl::search2(root,cmp,key);
+        if(dire)
+        {
+            auto node=my_new(Node::construct_data,std::move(key),T());
+            Impl::insert(pos,dire,node);
+            return node->data.second;
+        }
+        else
+        {
+            Impl::search2_no_insert(pos);
+            return pos->data.second;
+        }
+    }
 //迭代器
 public:
-	iterator begin()noexcept{return iterator(Impl::min(root),root);}
-	const_iterator begin()const noexcept{return const_iterator(Impl::min(root),root);}
-	const_iterator cbegin()const noexcept{return const_iterator(Impl::min(root),root);}
-	iterator end()noexcept{return iterator(root,root);}
-	const_iterator end()const noexcept{return const_iterator(root,root);}
-	const_iterator cend()const noexcept{return const_iterator(root,root);}
-	reverse_iterator rbegin()noexcept{return reverse_iterator(iterator(root,root));}
-	const_reverse_iterator rbegin()const noexcept{return const_reverse_iterator(const_iterator(root,root));}
-	const_reverse_iterator crbegin()const noexcept{return const_reverse_iterator(const_iterator(root,root));}
-	reverse_iterator rend()noexcept{return reverse_iterator(iterator(Impl::min(root),root));}
-	const_reverse_iterator rend()const noexcept{return const_reverse_iterator(const_iterator(Impl::min(root),root));}
-	const_reverse_iterator crend()const noexcept{return const_reverse_iterator(const_iterator(Impl::min(root),root));}
+    iterator begin()noexcept{return iterator(Impl::min(root),root);}
+    const_iterator begin()const noexcept{return const_iterator(Impl::min(root),root);}
+    const_iterator cbegin()const noexcept{return const_iterator(Impl::min(root),root);}
+    iterator end()noexcept{return iterator(root,root);}
+    const_iterator end()const noexcept{return const_iterator(root,root);}
+    const_iterator cend()const noexcept{return const_iterator(root,root);}
+    reverse_iterator rbegin()noexcept{return reverse_iterator(iterator(root,root));}
+    const_reverse_iterator rbegin()const noexcept{return const_reverse_iterator(const_iterator(root,root));}
+    const_reverse_iterator crbegin()const noexcept{return const_reverse_iterator(const_iterator(root,root));}
+    reverse_iterator rend()noexcept{return reverse_iterator(iterator(Impl::min(root),root));}
+    const_reverse_iterator rend()const noexcept{return const_reverse_iterator(const_iterator(Impl::min(root),root));}
+    const_reverse_iterator crend()const noexcept{return const_reverse_iterator(const_iterator(Impl::min(root),root));}
 //容量
 public:
-	bool empty()const noexcept{return root->cnt==1;}
-	size_type size()const noexcept{return (root->cnt)-1;}
-	constexpr size_type max_size()const noexcept
-	{
-		return std::numeric_limits<size_type>::max()/sizeof(Node);
-	}
+    bool empty()const noexcept{return root->cnt==1;}
+    size_type size()const noexcept{return (root->cnt)-1;}
+    constexpr size_type max_size()const noexcept
+    {
+        return std::numeric_limits<size_type>::max()/sizeof(Node);
+    }
 //修改器
 public:
     //clear C++11起
-	void clear()noexcept
-	{
-		delete_subtree(root->left);
-		Impl::initalize_root(root);
-	}
+    void clear()noexcept
+    {
+        delete_subtree(root->left);
+        Impl::initalize_root(root);
+    }
     //insert (1)
-	std::pair<iterator,bool> insert(const value_type &value)
-	{
+    std::pair<iterator,bool> insert(const value_type &value)
+    {
         auto [pos,dire]=Impl::search2(root,cmp,value);
         if(dire)
         {
@@ -565,11 +565,11 @@ public:
             Impl::search2_no_insert(pos);
             return {iterator(pos,root),false};
         }
-	}
+    }
     //insert (2) C++11起
-	template<typename P,typename=std::enable_if_t<std::is_constructible_v<value_type,P&&>>>
-	std::pair<iterator,bool> insert(P &&value)
-	{
+    template<typename P,typename=std::enable_if_t<std::is_constructible_v<value_type,P&&>>>
+    std::pair<iterator,bool> insert(P &&value)
+    {
         auto [pos,dire]=Impl::search2(root,cmp,value);
         if(dire)
         {
@@ -582,10 +582,10 @@ public:
             Impl::search2_no_insert(pos);
             return {iterator(pos,root),false};
         }
-	}
+    }
     //insert (3) C++17起
-	std::pair<iterator,bool> insert(value_type &&value)
-	{
+    std::pair<iterator,bool> insert(value_type &&value)
+    {
         auto [pos,dire]=Impl::search2(root,cmp,value);
         if(dire)
         {
@@ -598,7 +598,7 @@ public:
             Impl::search2_no_insert(pos);
             return {iterator(pos,root),false};
         }
-	}
+    }
     //insert (4) C++11起
     iterator insert(const_iterator hint,const value_type &value)
     {
@@ -617,8 +617,8 @@ public:
     }
     //insert (5) C++11起
     template<typename P,typename=std::enable_if_t<std::is_constructible_v<value_type,P&&>>>
-	iterator insert(const_iterator hint,P &&value)
-	{
+    iterator insert(const_iterator hint,P &&value)
+    {
         auto [pos,dire]=Impl::search2_hint(root,cmp,value,hint.node);
         if(dire)
         {
@@ -631,11 +631,11 @@ public:
             Impl::search2_no_insert(pos);
             return iterator(pos,root);
         }
-	}
+    }
     //insert (6) C++17起
-	iterator insert(const_iterator hint,value_type &&value)
-	{
-		auto [pos,dire]=Impl::search2_hint(root,cmp,value,hint.node);
+    iterator insert(const_iterator hint,value_type &&value)
+    {
+        auto [pos,dire]=Impl::search2_hint(root,cmp,value,hint.node);
         if(dire)
         {
             auto node=my_new(Node::construct_data,std::move(value));
@@ -647,7 +647,7 @@ public:
             Impl::search2_no_insert(pos);
             return iterator(pos,root);
         }
-	}
+    }
     //insert (7)
     template<typename InputIt>
     void insert(InputIt first,InputIt last)
@@ -1151,34 +1151,34 @@ private:
     }
 
     template<class... Args>
-	inline Node* my_new(Args &&...args)
-	{
-		auto x=my_new_raw();
-		std::allocator_traits<allocator_type>::construct(alloc,x,std::forward<Args>(args)...);
-		return x;
-	}
+    inline Node* my_new(Args &&...args)
+    {
+        auto x=my_new_raw();
+        std::allocator_traits<allocator_type>::construct(alloc,x,std::forward<Args>(args)...);
+        return x;
+    }
 
     inline void my_delete_raw(Node *x)
     {
         std::allocator_traits<allocator_type>::deallocate(alloc,x,1);
     }
 
-	inline void my_delete(Node *x)
-	{
-		std::allocator_traits<allocator_type>::destroy(alloc,x);
-		my_delete_raw(x);
-	}
+    inline void my_delete(Node *x)
+    {
+        std::allocator_traits<allocator_type>::destroy(alloc,x);
+        my_delete_raw(x);
+    }
 
     // Node* copy_subtree(Node *node,Node *parent)
-	// {
-	// 	if(node==nullptr)return nullptr;
-	// 	Node *new_node=my_new(node->data);
-	// 	new_node->cnt=node->cnt;
-	// 	new_node->parent=parent;
-	// 	new_node->left=copy_subtree(node->left,new_node);
-	// 	new_node->right=copy_subtree(node->right,new_node);
-	// 	return new_node;
-	// }
+    // {
+    //  if(node==nullptr)return nullptr;
+    //  Node *new_node=my_new(node->data);
+    //  new_node->cnt=node->cnt;
+    //  new_node->parent=parent;
+    //  new_node->left=copy_subtree(node->left,new_node);
+    //  new_node->right=copy_subtree(node->right,new_node);
+    //  return new_node;
+    // }
 
     Node* copy_subtree(Node *root)
     {
@@ -1220,7 +1220,7 @@ private:
     }
 
     void delete_subtree(Node *node)
-	{
+    {
         if(!node)return;
         node->parent=nullptr;
         while(true)
@@ -1244,7 +1244,7 @@ private:
                 }
             }
         }
-	}
+    }
 };
 }
 

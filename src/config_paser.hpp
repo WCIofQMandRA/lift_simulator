@@ -7,7 +7,7 @@
 #include <memory>
 #include <stdexcept>
 #include <sstream>
-#include <vector>
+#include "vector.hpp"
 #include "splay_tree.hpp"
 
 namespace zzc
@@ -45,16 +45,16 @@ public:
     }
 };
 template<typename T>
-class converter<std::vector<T>>:public converter_base
+class converter<zzc::vector<T>>:public converter_base
 {
 public:
     virtual void parse(std::any &v,const std::string &s)override
     {
         std::istringstream sin(s);
-        std::vector<T> vec;
+        zzc::vector<T> vec;
         T tmp;
         while(sin>>tmp)vec.push_back(tmp);
-        v=std::make_any<std::vector<T>>(vec);
+        v=std::make_any<zzc::vector<T>>(vec);
     }
 };
 }

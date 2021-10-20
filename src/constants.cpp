@@ -34,7 +34,7 @@ uint64_t min_take_lift_down=5;//下楼时，选择乘坐电梯的最小楼层差
 uint64_t press_button_tick=10;//乘客从按下呼叫电梯的按钮的耗时
 
 int16_t n_floors=13,base_floor=1;
-std::vector<std::string> floor_name=
+zzc::vector<std::string> floor_name=
 {"-1","1","2","3","4","5","6","7","8","9","10","11","12"};
 int16_t waiting_floor[2]={1,7};//待命楼层, 按优先级从高到低排序
 std::pair<double,double> passenger_weight_range={40,80};//乘客质量
@@ -74,8 +74,8 @@ uint64_t min_take_lift_down;//下楼时，选择乘坐电梯的最小楼层差
 uint64_t press_button_tick;//乘客从按下呼叫电梯的按钮的耗时
 
 int16_t n_floors,base_floor;
-std::vector<std::string> floor_name;
-std::vector<int16_t> waiting_floor;//待命楼层, 按优先级从高到低排序
+zzc::vector<std::string> floor_name;
+zzc::vector<int16_t> waiting_floor;//待命楼层, 按优先级从高到低排序
 std::pair<double,double> passenger_weight_range;//乘客质量
 std::pair<int,int> passenger_number_range;//一天进出楼的人数
 std::pair<uint64_t,uint64_t> take_lift_time;//一天内有人坐电梯的时段

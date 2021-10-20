@@ -5,7 +5,7 @@
 #pragma once
 #include <cstdint>
 #include <utility>
-#include <vector>
+#include "vector.hpp"
 #include <string>
 namespace constant
 {
@@ -37,8 +37,8 @@ extern uint64_t min_take_lift_down;//下楼时，选择乘坐电梯的最小楼�
 extern uint64_t press_button_tick;//乘客从按下呼叫电梯的按钮的耗时
 
 extern int16_t n_floors,base_floor;
-extern std::vector<std::string>floor_name;
-extern std::vector<int16_t> waiting_floor;//待命楼层, 按优先级从高到低排序
+extern zzc::vector<std::string>floor_name;
+extern zzc::vector<int16_t> waiting_floor;//待命楼层, 按优先级从高到低排序
 extern std::pair<double,double> passenger_weight_range;//乘客质量
 extern std::pair<int,int> passenger_number_range;//一天进出楼的人数
 extern std::pair<uint64_t,uint64_t> take_lift_time;//一天内有人坐电梯的时段
