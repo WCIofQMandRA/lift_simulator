@@ -19,6 +19,7 @@ class converter_base
 {
 public:
     virtual void parse(std::any &,const std::string&)=0;
+    virtual ~converter_base()=default;
 };
 template<typename T>
 class converter:public converter_base
