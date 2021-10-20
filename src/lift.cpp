@@ -315,7 +315,7 @@ void event_check_lift_state::call(std::ostream &os)const
 			assert(constant::waiting_floor[lift->m_waiting_floor]>=lift->m_floor);
 			if(constant::waiting_floor[lift->m_waiting_floor]==lift->m_floor)
 			{
-				os<<"电梯 #"<<lift->m_liftID<<"到达待命楼层.\n";
+				output_time(os<<"[",time)<<"]\t电梯 #"<<lift->m_liftID<<"到达待命楼层.\n\n";
 				lift->m_direction=2;
 				event_queue.push<event_change_direction>(time+constant::lift_up_last_extra_tick,lift,0);
 			}
