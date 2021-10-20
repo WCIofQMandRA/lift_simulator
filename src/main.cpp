@@ -9,7 +9,6 @@
 #include "variables.hpp"
 #include "random.hpp"
 #include <iostream>
-#include <array>
 #include <iomanip>
 #include <fstream>
 #include <cstdlib>
