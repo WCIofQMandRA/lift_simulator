@@ -31,7 +31,7 @@ std::ostream& event_t::output_time(std::ostream &os,uint64_t time)const
 	return os<<t;
 }
 
-std::unordered_set<std::string> event_queue_t::event_happening(256);
+plain_hash_table event_queue_t::event_happening;
 
 void event_queue_t::call_and_pop(std::ostream &os)
 {

@@ -8,8 +8,8 @@
 #include <string>
 #include <iostream>
 #include <memory>
-#include <unordered_set>
 #include <cassert>
+#include "plain_hash_table.hpp"
 
 //事件
 class event_t
@@ -66,5 +66,5 @@ private:
 		}
 	};
 	zzc::priority_queue<std::unique_ptr<event_t>,compare_event> qu;
-	static std::unordered_set<std::string> event_happening;
+	static plain_hash_table event_happening;
 };
