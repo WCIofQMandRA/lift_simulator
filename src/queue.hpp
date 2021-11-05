@@ -43,7 +43,7 @@ public:
 		{
 			elem[i]=other.elem[j];
 		}
-		m_back=other.size;
+		m_back=other.m_size;
 		return *this;
 	}
 	constexpr queue& operator=(queue &&other)noexcept

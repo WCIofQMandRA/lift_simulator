@@ -131,6 +131,7 @@ public:
 	void press_floor(uint64_t time,int16_t floor);//按楼层键
 	void press_close(uint64_t time);//按关门键
 	void size_nfloors(){m.passengers.resize(constant::n_floors);}
+	void load_state(lift_state &dst){dst=m;}
 private:
 	void add_called_up_floor(uint64_t time,int16_t floor);//将floor添加到m_called_up_floor中
 	void add_called_down_floor(uint64_t time,int16_t floor);
@@ -187,6 +188,7 @@ public:
 	//按下按钮↑，同时呼叫电梯
 	void press_up(uint64_t time,int16_t floor);
 	void press_down(uint64_t time,int16_t floor);
+	void load_state(wbutton_state &dst){dst=m;}
 private:
 	//关闭向上的按钮，同时取消电梯的被呼叫状态
 	void switch_off_up(int16_t floor);

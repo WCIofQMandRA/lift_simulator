@@ -4,12 +4,21 @@
 
 
 #pragma once
-#include <gtkmm/box.h>
+#include <gtkmm/grid.h>
+#include <memory>
 
+struct wbutton_state;
 namespace gui
 {
-class widget_wbutton:public Gtk::Box
+struct widget_wbutton_impl;
+class widget_wbutton:public Gtk::Grid
 {
-
+public:
+    widget_wbutton(wbutton_state *wbutton);
+    ~widget_wbutton();
+    void update();
+private:
+    wbutton_state *m_wbutton;
+    std::unique_ptr<widget_wbutton_impl> data;
 };
 }

@@ -12,6 +12,7 @@
 #include <gtkmm/label.h>
 #include <gtkmm/entry.h>
 #include <memory>
+#include "lift.hpp"
 
 namespace gui
 {
@@ -22,6 +23,11 @@ class mainwindow:public Gtk::Window
 public:
 	mainwindow();
 	~mainwindow();
+protected:
+	void on_next_clicked();
+	void on_finish_clicked();
+	void on_nextn_clicked();
+	void on_step_inserted(guint position,const gchar* chars,guint n_chars);
 private:
 	Gtk::Box m_vbox{Gtk::ORIENTATION_VERTICAL};
 	
@@ -39,5 +45,8 @@ private:
 	
 	Gtk::ScrolledWindow m_scrolled_message;
 	Gtk::TextView m_view_message;
+
+	lift_state m_lift_state0,m_lift_state1;
+	wbutton_state m_wbutton_state;
 };
 }
