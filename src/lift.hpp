@@ -98,17 +98,39 @@ private:
 //2. 清空m_pressed_button（这与包括z005的电梯在内的许多电梯的行为一致）
 //3. 如果墙上的按钮没有按下，则将移动状态设为0；如果墙上m_direction方向的按钮按下，则继续向这个方向移动；
 //  否则，将m_direction设置为-m_direction
+struct lift_state
+{
+	int8_t is_door_open=0;//是否开门0:关门 1:正在开门 2:开门
+	//若电梯正在返回或已经位于待命层，则为0/1，否则为-1
+	//电梯的待命层为waiting_floor[m_waiting_floor]
+	int16_t waiting_floor=-1;
+	int16_t floor=1;//楼层
+	int16_t liftID;//电梯编号
+	//移动方向：-3 -2 -1 0 1 2 3
+	//耗时：
+	//-3 -> -1 lift_down_last_extra_tick
+	//-1 -> -3 lift_down_first_extra_tick
+	//3 -> 1 lift_up_last_extra_tick
+	//1 -> 3 lift_up_first_extra_tick
+	//-2/2是正在加/减速的状态
+	int16_t direction=0;
+	uint64_t begin_static_time=0,begin_no_passenger_time=0;//开始处在静止状态的时刻; 开始处在未载客的状态的时刻
+	double carrying_weight=0;//载的乘客的质量
+	uint64_t pressed_button=0;//按下的楼层按钮
+	uint64_t called_down_floor=0,called_up_floor=0;//呼叫电梯的楼层
+	zzc::vector<zzc::queue<passenger_t>> passengers;//电梯内的乘客
+};
 class lift_t
 {
 public:
 	friend class wbutton_t;
 	ZZCPP_FOR_EACH(ADD_FRIEND_IMPL,;,check_lift_state,arrive_at,change_direction,open_door,
 		passenger_out,passenger_in,check_timeout);
-	lift_t(int16_t ID):m_liftID(ID){}
+	lift_t(int16_t ID){m.liftID=ID;}
 	lift_t(const lift_t&)=delete;
 	void press_floor(uint64_t time,int16_t floor);//按楼层键
 	void press_close(uint64_t time);//按关门键
-	void size_nfloors(){m_passengers.resize(constant::n_floors);}
+	void size_nfloors(){m.passengers.resize(constant::n_floors);}
 private:
 	void add_called_up_floor(uint64_t time,int16_t floor);//将floor添加到m_called_up_floor中
 	void add_called_down_floor(uint64_t time,int16_t floor);
@@ -133,25 +155,7 @@ private:
 	void move_to(uint64_t time,int16_t floor);//移动到指定楼层
 	void check_state(uint64_t time);//检查状态
 private:
-	int8_t m_is_door_open=0;//是否开门0:关门 1:正在开门 2:开门
-	//若电梯正在返回或已经位于待命层，则为0/1，否则为-1
-	//电梯的待命层为waiting_floor[m_waiting_floor]
-	int16_t m_waiting_floor=-1;
-	int16_t m_floor=1;//楼层
-	int16_t m_liftID;//电梯编号
-	//移动方向：-3 -2 -1 0 1 2 3
-	//耗时：
-	//-3 -> -1 lift_down_last_extra_tick
-	//-1 -> -3 lift_down_first_extra_tick
-	//3 -> 1 lift_up_last_extra_tick
-	//1 -> 3 lift_up_first_extra_tick
-	//-2/2是正在加/减速的状态
-	int16_t m_direction=0;
-	uint64_t m_begin_static_time=0,m_begin_no_passenger_time=0;//开始处在静止状态的时刻; 开始处在未载客的状态的时刻
-	double m_carrying_weight=0;//载的乘客的质量
-	uint64_t m_pressed_button=0;//按下的楼层按钮
-	uint64_t m_called_down_floor=0,m_called_up_floor=0;//呼叫电梯的楼层
-	zzc::vector<zzc::queue<passenger_t>> m_passengers;//电梯内的乘客
+	lift_state m;
 };
 
 //按下墙上的按钮
@@ -166,6 +170,11 @@ private:
 };
 
 //位于每层楼墙上的按钮
+struct wbutton_state
+{
+	uint64_t up_pressed;//向上的按钮被按下
+	uint64_t down_pressed;//向下的按钮被按下
+};
 class wbutton_t
 {
 public:
@@ -183,7 +192,6 @@ private:
 	void switch_off_up(int16_t floor);
 	void switch_off_down(int16_t floor);
 private:
-	uint64_t m_up_pressed;//向上的按钮被按下
-	uint64_t m_down_pressed;//向下的按钮被按下
+	wbutton_state m;
 };
 #undef ADD_FRIEND_IMPL
