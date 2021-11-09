@@ -64,11 +64,13 @@ mainwindow::mainwindow()
 	m_view_message.set_buffer(Gtk::TextBuffer::create());
 	m_view_message.set_wrap_mode(Gtk::WRAP_WORD_CHAR);
 	m_view_message.property_editable()=false;
+	m_endmark=m_view_message.get_buffer()->create_mark(m_view_message.get_buffer()->end(),false);
 
 	m_button_next.signal_clicked().connect(sigc::mem_fun(*this,&mainwindow::on_next_clicked));
 	m_button_finish.signal_clicked().connect(sigc::mem_fun(*this,&mainwindow::on_finish_clicked));
 	m_button_nextn.signal_clicked().connect(sigc::mem_fun(*this,&mainwindow::on_nextn_clicked));
 	m_entry_step.get_buffer()->signal_inserted_text().connect(sigc::mem_fun(*this,&mainwindow::on_step_inserted));
+	m_entry_step.get_buffer()->signal_deleted_text().connect(sigc::mem_fun(*this,&mainwindow::on_step_deleted));
 
 	show_all_children();
 }
@@ -77,7 +79,31 @@ mainwindow::~mainwindow(){}
 
 void mainwindow::on_next_clicked()
 {
-
+	using namespace variable;
+	//执行到控制台第一次输出
+	std::stringstream str_cout;
+	while(!event_queue.empty())
+	{
+		bool printed=event_queue.print(str_cout);
+		event_queue.call_and_pop(str_cout);
+		if(printed)
+		{
+			str_cout<<"\n";
+			break;
+		}
+	}
+	if(auto s=str_cout.str();s.size())
+	{
+		auto &buf=*m_view_message.get_buffer().get();
+		buf.insert(buf.end(),s);
+		m_view_message.scroll_to(m_endmark);
+	}
+	lifts[0].load_state(m_lift_state0);
+	lifts[1].load_state(m_lift_state1);
+	wall_buttons.load_state(m_wbutton_state);
+	m_lift0->update();
+	m_lift1->update();
+	m_wbutton->update();
 }
 
 void mainwindow::on_finish_clicked()
@@ -93,6 +119,8 @@ void mainwindow::on_nextn_clicked()
 void mainwindow::on_step_inserted(guint,const gchar*,guint)
 {
 	auto text=m_entry_step.get_text();
+	bool text_changed=false;
+	if(text.length()>5)text=text.substr(0,5),text_changed=true;
 	if([&]
 	{
 		for(auto it=text.begin();it!=text.end();++it)
@@ -107,7 +135,24 @@ void mainwindow::on_step_inserted(guint,const gchar*,guint)
 			if(i>='0'&&i<='9')
 				new_text+=i;
 		}
-		m_entry_step.set_text(new_text);
+		text=new_text;
+		text_changed=true;
 	}
+	if(text_changed)
+		m_entry_step.set_text(text);
+
+	if(text.size())
+		m_nextn=std::stoi(text.raw());
+	else m_nextn=10;//默认值
+	m_button_nextn.set_label(Glib::ustring::compose("执行%1步",m_nextn));
+}
+
+void mainwindow::on_step_deleted(guint,guint)
+{
+	auto text=m_entry_step.get_text();
+	if(text.size())
+		m_nextn=std::stoi(text.raw());
+	else m_nextn=10;//默认值
+	m_button_nextn.set_label(Glib::ustring::compose("执行%1步",m_nextn));
 }
 }

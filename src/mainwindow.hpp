@@ -8,6 +8,7 @@
 #include <gtkmm/buttonbox.h>
 #include <gtkmm/button.h>
 #include <gtkmm/textview.h>
+#include <gtkmm/textbuffer.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/label.h>
 #include <gtkmm/entry.h>
@@ -28,6 +29,7 @@ protected:
 	void on_finish_clicked();
 	void on_nextn_clicked();
 	void on_step_inserted(guint position,const gchar* chars,guint n_chars);
+	void on_step_deleted(guint position,guint n_chars);
 private:
 	Gtk::Box m_vbox{Gtk::ORIENTATION_VERTICAL};
 	
@@ -42,8 +44,10 @@ private:
 	Gtk::Label m_label1{"步数"};
 	Gtk::Entry m_entry_step;
 	Gtk::Button m_button_nextn{"执行10步"};
+	int m_nextn=10;
 	
 	Gtk::ScrolledWindow m_scrolled_message;
+	Glib::RefPtr<Gtk::TextBuffer::Mark> m_endmark;
 	Gtk::TextView m_view_message;
 
 	lift_state m_lift_state0,m_lift_state1;
