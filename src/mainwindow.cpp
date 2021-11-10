@@ -5,15 +5,17 @@
 #include "mainwindow.hpp"
 #include <gtkmm/textbuffer.h>
 #include <gtkmm/entrybuffer.h>
+#include <glibmm/main.h>
+#include <gtkmm/filechoosernative.h>
 #include "widget_wbutton.hpp"
 #include "widget_lift.hpp"
 #include "variables.hpp"
 #include <unistd.h>
 #include <fcntl.h>
 #include <limits.h>
-#include <glibmm/main.h>
 #include <fstream>
 #include "random.hpp"
+
 namespace gui
 {
 mainwindow::mainwindow()
@@ -50,6 +52,8 @@ mainwindow::mainwindow()
 	
 	m_vbox.pack_start(m_scrolled_message,Gtk::PACK_EXPAND_WIDGET,10);
 
+	m_vbox.pack_start(m_button_save,Gtk::PACK_SHRINK);
+
 	m_vbox.pack_start(m_statusbar,Gtk::PACK_SHRINK);
 	m_statusbar.pack_start(m_status_seed,Gtk::PACK_SHRINK,10);
 	m_statusbar.pack_start(m_status_total_steps,Gtk::PACK_SHRINK,10);
@@ -79,6 +83,8 @@ mainwindow::mainwindow()
 	m_view_message.set_wrap_mode(Gtk::WRAP_WORD_CHAR);
 	m_view_message.property_editable()=false;
 	m_endmark=m_view_message.get_buffer()->create_mark(m_view_message.get_buffer()->end(),false);
+	//保存输出按钮
+	m_button_save.set_halign(Gtk::ALIGN_END);
 	//状态栏
 	m_statusbar.set_halign(Gtk::ALIGN_END);
 	m_statusbar.set_valign(Gtk::ALIGN_END);
@@ -86,12 +92,13 @@ mainwindow::mainwindow()
 	m_status_total_steps.set_markup("<b>总步骤数</b>: 0");
 	m_status_total_events.set_markup("<b>总事件数</b>: 0");
 
-	m_button_next.signal_clicked().connect(sigc::mem_fun(*this,&mainwindow::on_next_clicked));
-	m_button_finish.signal_clicked().connect(sigc::mem_fun(*this,&mainwindow::on_finish_clicked));
-	m_button_nextn.signal_clicked().connect(sigc::mem_fun(*this,&mainwindow::on_nextn_clicked));
-	m_entry_step.get_buffer()->signal_inserted_text().connect(sigc::mem_fun(*this,&mainwindow::on_step_inserted));
-	m_entry_step.get_buffer()->signal_deleted_text().connect(sigc::mem_fun(*this,&mainwindow::on_step_deleted));
-	Glib::signal_timeout().connect(sigc::mem_fun(*this,&mainwindow::on_time_out),20);
+	m_button_next.signal_clicked().connect(sigc::mem_fun(this,&mainwindow::on_next_clicked));
+	m_button_finish.signal_clicked().connect(sigc::mem_fun(this,&mainwindow::on_finish_clicked));
+	m_button_nextn.signal_clicked().connect(sigc::mem_fun(this,&mainwindow::on_nextn_clicked));
+	m_button_save.signal_clicked().connect(sigc::mem_fun(this,&mainwindow::on_save_clicked));
+	m_entry_step.get_buffer()->signal_inserted_text().connect(sigc::mem_fun(this,&mainwindow::on_step_inserted));
+	m_entry_step.get_buffer()->signal_deleted_text().connect(sigc::mem_fun(this,&mainwindow::on_step_deleted));
+	Glib::signal_timeout().connect(sigc::mem_fun(this,&mainwindow::on_time_out),20);
 
 	show_all_children();
 }
@@ -297,5 +304,17 @@ void mainwindow::output_statistics()
 	cout<<"详细信息见 "<<filename<<endl;
 	s=cout.str();cout.str("");
 	::write(pipe_fd[1],s.data(),s.size());
+}
+
+void mainwindow::on_save_clicked()
+{
+	auto dia=Gtk::FileChooserNative::create("保存终端输出",Gtk::FILE_CHOOSER_ACTION_SAVE,"保存(_S)","取消(_C)");
+	if(dia->run()==-3)
+	{
+		std::ofstream fout(dia->get_file()->get_path(),std::ios::binary);
+		auto s=m_view_message.get_buffer()->get_text().raw();
+		fout.write(s.data(),s.size());
+		fout.close();
+	}
 }
 }

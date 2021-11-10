@@ -37,6 +37,8 @@ protected:
 	bool on_time_out();
 	void thread_main();
 	void output_statistics();
+	void on_save_clicked();
+//	void on_dialog_response(int response_id, Gtk::FileChooserDialog* dialog);
 private:
 	Gtk::Box m_vbox{Gtk::ORIENTATION_VERTICAL};
 	
@@ -59,6 +61,8 @@ private:
 
 	Gtk::Box m_statusbar;
 	Gtk::Label m_status_seed,m_status_total_steps,m_status_total_events;
+
+	Gtk::Button m_button_save{"保存终端输出"};
 
 	lift_state m_lift_state0,m_lift_state1;
 	wbutton_state m_wbutton_state;
