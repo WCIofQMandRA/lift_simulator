@@ -12,6 +12,8 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <glibmm/main.h>
+#include <fstream>
+#include "random.hpp"
 namespace gui
 {
 mainwindow::mainwindow()
@@ -110,7 +112,7 @@ void mainwindow::thread_main()
 	std::unique_lock lock1(sim_mutex);
 	while(!event_queue.empty())
 	{
-		std::stringstream str_out;
+		std::ostringstream str_out;
 		while(steps_to_process==0)
 		{
 			sim_thread_notifier.wait(lock1);
@@ -219,10 +221,11 @@ bool mainwindow::on_time_out()
 		m_button_next.set_sensitive(false);
 		m_button_nextn.set_sensitive(false);
 		m_entry_step.set_sensitive(false);
+		std::thread(sigc::mem_fun(this,&mainwindow::output_statistics)).detach();
 	}
 	static thread_local char buffer[PIPE_BUF];
-	auto len=::read(pipe_fd[0],buffer,PIPE_BUF);
-	if(len>0)
+	for(auto len=::read(pipe_fd[0],buffer,PIPE_BUF);len>0;
+		len=::read(pipe_fd[0],buffer,PIPE_BUF))
 	{
 		std::string s(buffer,len);
 		auto &buf=*m_view_message.get_buffer().get();
@@ -246,5 +249,53 @@ bool mainwindow::on_time_out()
 		m_entry_step.set_sensitive(true);
 	}
 	return true;
+}
+
+void mainwindow::output_statistics()
+{
+	using namespace statistic;
+	using std::endl,constant::floor_name;
+	std::string s;
+	std::ostringstream cout;
+	cout<<"总乘客数: "<<up_total_passengers+down_total_passengers
+	<<"， 其中"<<up_total_passengers_lift+down_total_passengers_lift<<"人乘坐电梯\n";
+	cout<<"平均耗时: 上楼"<<0.1*(double)up_total_tick/(double)up_total_floors<<"s/层   下楼"
+	<<0.1*(double)down_total_tick/(double)down_total_floors<<"s/层\n";
+	cout<<"电梯的平均耗时: 上楼"<<0.1*(double)up_total_tick_lift/(double)up_total_floors_lift<<"s/层   下楼"
+	<<0.1*(double)down_total_tick_lift/(double)down_total_floors_lift<<"s/层\n";
+	cout<<"楼梯的平均耗时: 上楼"<<0.1*double(up_total_tick-up_total_tick_lift)
+	/double(up_total_floors-up_total_floors_lift)<<"s/层   下楼"
+	<<0.1*double(down_total_tick-down_total_tick_lift)
+	/double(down_total_floors-down_total_floors_lift)<<"s/层\n\n";
+	s=cout.str();cout.str("");
+	::write(pipe_fd[1],s.data(),s.size());
+
+	cout<<"最长耗时: 上楼"<<up_max_time<<"s/层   下楼"<<down_max_time<<"s/层\n";
+	cout<<"电梯的最长耗时: 上楼"<<up_max_time_lift<<"s/层   下楼"<<down_max_time_lift<<"s/层\n";
+	cout<<"楼梯的最长耗时: 上楼"<<up_max_time_stairs<<"s/层   下楼"<<down_max_time_stairs<<"s/层\n\n";
+	s=cout.str();cout.str("");
+	::write(pipe_fd[1],s.data(),s.size());
+
+	cout<<"最短耗时: 上楼"<<up_min_time<<"s/层   下楼"<<down_min_time<<"s/层\n";
+	cout<<"电梯的最短耗时: 上楼"<<up_min_time_lift<<"s/层   下楼"<<down_min_time_lift<<"s/层\n";
+	cout<<"楼梯的最短耗时: 上楼"<<up_min_time_stairs<<"s/层   下楼"<<down_min_time_stairs<<"s/层\n\n";
+	s=cout.str();cout.str("");
+	::write(pipe_fd[1],s.data(),s.size());
+
+	std::string filename=std::to_string(rand_between(0,100000000))+".csv";
+	std::ofstream fout(filename);
+	fout<<"乘客,起点,终点,出现时刻,启程时刻,到达时刻,最大等待时间,乘坐电梯\n";
+	while(!all_passengers.empty())
+	{
+		auto &p=all_passengers.front();
+		fout<<p.first.ID<<","<<floor_name[p.first.source]<<","<<floor_name[p.first.destination]<<","
+		<<p.first.appear_time<<","<<p.first.depart_time<<","<<p.first.arrive_time<<","<<p.first.tolerance_time<<","
+		<<p.second<<"\n";
+		all_passengers.pop();
+	}
+	fout.close();
+	cout<<"详细信息见 "<<filename<<endl;
+	s=cout.str();cout.str("");
+	::write(pipe_fd[1],s.data(),s.size());
 }
 }

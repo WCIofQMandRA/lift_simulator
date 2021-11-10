@@ -36,6 +36,7 @@ protected:
 	void on_step_deleted(guint position,guint n_chars);
 	bool on_time_out();
 	void thread_main();
+	void output_statistics();
 private:
 	Gtk::Box m_vbox{Gtk::ORIENTATION_VERTICAL};
 	
