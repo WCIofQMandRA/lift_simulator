@@ -10,9 +10,6 @@
 #include "widget_wbutton.hpp"
 #include "widget_lift.hpp"
 #include "variables.hpp"
-#include <unistd.h>
-#include <fcntl.h>
-#include <limits.h>
 #include <fstream>
 #include "random.hpp"
 
@@ -20,7 +17,6 @@ namespace gui
 {
 mainwindow::mainwindow()
 {
-	::pipe2(pipe_fd,O_NONBLOCK|O_DIRECT);
 	sim_thread=std::thread(sigc::mem_fun(this,&mainwindow::thread_main));
 
 	variable::lifts[0].load_state(m_lift_state0);
@@ -144,9 +140,17 @@ void mainwindow::thread_main()
 		}
 		auto s=str_out.str();
 		if(s.size())
-			::write(pipe_fd[1],s.data(),s.size());
+		{
+			std::unique_lock _(message_queue_mutex);
+			message_queue.push(s);
+		}
 	}
 	sim_thread_done=true;
+	state_mutex.lock();
+	lifts[0].load_state(m_lift_state0);
+	lifts[1].load_state(m_lift_state1);
+	wall_buttons.load_state(m_wbutton_state);
+	state_mutex.unlock();
 }
 
 void mainwindow::on_next_clicked()
@@ -230,11 +234,11 @@ bool mainwindow::on_time_out()
 		m_entry_step.set_sensitive(false);
 		std::thread(sigc::mem_fun(this,&mainwindow::output_statistics)).detach();
 	}
-	static thread_local char buffer[PIPE_BUF];
-	for(auto len=::read(pipe_fd[0],buffer,PIPE_BUF);len>0;
-		len=::read(pipe_fd[0],buffer,PIPE_BUF))
+	while(message_queue.size())
 	{
-		std::string s(buffer,len);
+		std::unique_lock _(message_queue_mutex);
+		std::string s=message_queue.front();
+		message_queue.pop();
 		auto &buf=*m_view_message.get_buffer().get();
 		buf.insert(buf.end(),s);
 		m_view_message.scroll_to(m_endmark);
@@ -274,20 +278,14 @@ void mainwindow::output_statistics()
 	/double(up_total_floors-up_total_floors_lift)<<"s/层   下楼"
 	<<0.1*double(down_total_tick-down_total_tick_lift)
 	/double(down_total_floors-down_total_floors_lift)<<"s/层\n\n";
-	s=cout.str();cout.str("");
-	::write(pipe_fd[1],s.data(),s.size());
 
 	cout<<"最长耗时: 上楼"<<up_max_time<<"s/层   下楼"<<down_max_time<<"s/层\n";
 	cout<<"电梯的最长耗时: 上楼"<<up_max_time_lift<<"s/层   下楼"<<down_max_time_lift<<"s/层\n";
 	cout<<"楼梯的最长耗时: 上楼"<<up_max_time_stairs<<"s/层   下楼"<<down_max_time_stairs<<"s/层\n\n";
-	s=cout.str();cout.str("");
-	::write(pipe_fd[1],s.data(),s.size());
 
 	cout<<"最短耗时: 上楼"<<up_min_time<<"s/层   下楼"<<down_min_time<<"s/层\n";
 	cout<<"电梯的最短耗时: 上楼"<<up_min_time_lift<<"s/层   下楼"<<down_min_time_lift<<"s/层\n";
 	cout<<"楼梯的最短耗时: 上楼"<<up_min_time_stairs<<"s/层   下楼"<<down_min_time_stairs<<"s/层\n\n";
-	s=cout.str();cout.str("");
-	::write(pipe_fd[1],s.data(),s.size());
 
 	std::string filename=std::to_string(rand_between(0,100000000))+".csv";
 	std::ofstream fout(filename);
@@ -302,8 +300,9 @@ void mainwindow::output_statistics()
 	}
 	fout.close();
 	cout<<"详细信息见 "<<filename<<endl;
-	s=cout.str();cout.str("");
-	::write(pipe_fd[1],s.data(),s.size());
+	
+	std::unique_lock _(message_queue_mutex);
+	message_queue.push(cout.str());
 }
 
 void mainwindow::on_save_clicked()

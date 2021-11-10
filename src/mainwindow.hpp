@@ -72,6 +72,8 @@ private:
 	std::atomic_bool sim_thread_done=false;
 	std::condition_variable sim_thread_notifier;
 	std::mutex sim_mutex,state_mutex;
-	int pipe_fd[2];
+	
+	std::mutex message_queue_mutex;
+	zzc::queue<std::string> message_queue;
 };
 }
