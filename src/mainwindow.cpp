@@ -51,7 +51,7 @@ mainwindow::mainwindow()
 	m_vbox.pack_start(m_statusbar,Gtk::PACK_SHRINK);
 	m_statusbar.pack_start(m_status_seed,Gtk::PACK_SHRINK,10);
 	m_statusbar.pack_start(m_status_total_steps,Gtk::PACK_SHRINK,10);
-	m_statusbar.pack_start(m_status_total_events,Gtk::PACK_SHRINK);
+	m_statusbar.pack_start(m_status_total_events,Gtk::PACK_SHRINK,10);
 	
 	////////////////////////
 	//控制按钮

@@ -10,6 +10,13 @@
 #include "lift.hpp"
 #include "constants.hpp"
 
+static Glib::ustring my_to_string(double x)
+{
+    char buffer[16];
+    buffer[snprintf(buffer,16,"%.4f",x+1e-6)]='\0';
+    return buffer;
+}
+
 namespace gui
 {
 
@@ -67,7 +74,7 @@ void widget_lift::update()
     data->label_floor.set_markup(Glib::ustring::compose("<b>楼层</b>: %1",constant::floor_name[m_lift->floor]));
     data->label_speed.set_markup(Glib::ustring::compose("<b>方向</b>: %1 <small>(%2)</small>",
         m_lift->direction==0?"—":(m_lift->direction>0?"↑":"↓"),m_lift->direction));
-    data->label_carrying.set_markup(Glib::ustring::compose("<b>载重</b>: %1kg",m_lift->carrying_weight));
+    data->label_carrying.set_markup(Glib::ustring::compose("<b>载重</b>: %1kg",my_to_string(m_lift->carrying_weight)));
     data->label_door.set_label(m_lift->is_door_open==0?"关门":(m_lift->is_door_open==1?"正在开/关门":"开门"));
     for(int i=0;i<constant::n_floors;++i)
     {
