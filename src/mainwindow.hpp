@@ -13,6 +13,10 @@
 #include <gtkmm/label.h>
 #include <gtkmm/entry.h>
 #include <memory>
+#include <thread>
+#include <atomic>
+#include <mutex>
+#include <condition_variable>
 #include "lift.hpp"
 
 namespace gui
@@ -30,6 +34,8 @@ protected:
 	void on_nextn_clicked();
 	void on_step_inserted(guint position,const gchar* chars,guint n_chars);
 	void on_step_deleted(guint position,guint n_chars);
+	bool on_time_out();
+	void thread_main();
 private:
 	Gtk::Box m_vbox{Gtk::ORIENTATION_VERTICAL};
 	
@@ -52,5 +58,12 @@ private:
 
 	lift_state m_lift_state0,m_lift_state1;
 	wbutton_state m_wbutton_state;
+
+	std::atomic<size_t> steps_to_process=0;
+	std::thread sim_thread;
+	std::atomic_bool sim_thread_done=false;
+	std::condition_variable sim_thread_notifier;
+	std::mutex sim_mutex,state_mutex;
+	int pipe_fd[2];
 };
 }

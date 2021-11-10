@@ -8,10 +8,17 @@
 #include "widget_wbutton.hpp"
 #include "widget_lift.hpp"
 #include "variables.hpp"
+#include <unistd.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <glibmm/main.h>
 namespace gui
 {
 mainwindow::mainwindow()
 {
+	::pipe2(pipe_fd,O_NONBLOCK|O_DIRECT);
+	sim_thread=std::thread(sigc::mem_fun(this,&mainwindow::thread_main));
+
 	variable::lifts[0].load_state(m_lift_state0);
 	variable::lifts[1].load_state(m_lift_state1);
 	variable::wall_buttons.load_state(m_wbutton_state);
@@ -71,49 +78,73 @@ mainwindow::mainwindow()
 	m_button_nextn.signal_clicked().connect(sigc::mem_fun(*this,&mainwindow::on_nextn_clicked));
 	m_entry_step.get_buffer()->signal_inserted_text().connect(sigc::mem_fun(*this,&mainwindow::on_step_inserted));
 	m_entry_step.get_buffer()->signal_deleted_text().connect(sigc::mem_fun(*this,&mainwindow::on_step_deleted));
+	Glib::signal_timeout().connect(sigc::mem_fun(*this,&mainwindow::on_time_out),20);
 
 	show_all_children();
 }
 
 mainwindow::~mainwindow(){}
 
-void mainwindow::on_next_clicked()
+void mainwindow::thread_main()
 {
 	using namespace variable;
-	//执行到控制台第一次输出
-	std::stringstream str_cout;
+	std::unique_lock lock1(sim_mutex);
 	while(!event_queue.empty())
 	{
-		bool printed=event_queue.print(str_cout);
-		event_queue.call_and_pop(str_cout);
+		std::stringstream str_out;
+		while(steps_to_process==0)
+		{
+			sim_thread_notifier.wait(lock1);
+		}
+		bool printed=event_queue.print(str_out);
+		event_queue.call_and_pop(str_out);
 		if(printed)
 		{
-			str_cout<<"\n";
-			break;
+			str_out<<"\n";
+			--steps_to_process;
+			if(state_mutex.try_lock())
+			{
+				lifts[0].load_state(m_lift_state0);
+				lifts[1].load_state(m_lift_state1);
+				wall_buttons.load_state(m_wbutton_state);
+				state_mutex.unlock();
+			}
 		}
+		auto s=str_out.str();
+		if(s.size())
+			::write(pipe_fd[1],s.data(),s.size());
 	}
-	if(auto s=str_cout.str();s.size())
-	{
-		auto &buf=*m_view_message.get_buffer().get();
-		buf.insert(buf.end(),s);
-		m_view_message.scroll_to(m_endmark);
-	}
-	lifts[0].load_state(m_lift_state0);
-	lifts[1].load_state(m_lift_state1);
-	wall_buttons.load_state(m_wbutton_state);
-	m_lift0->update();
-	m_lift1->update();
-	m_wbutton->update();
+	sim_thread_done=true;
+}
+
+void mainwindow::on_next_clicked()
+{
+	m_button_finish.set_sensitive(false);
+	m_button_next.set_sensitive(false);
+	m_button_nextn.set_sensitive(false);
+	m_entry_step.set_sensitive(false);
+	++steps_to_process;
+	sim_thread_notifier.notify_one();
 }
 
 void mainwindow::on_finish_clicked()
 {
-
+	m_button_finish.set_sensitive(false);
+	m_button_next.set_sensitive(false);
+	m_button_nextn.set_sensitive(false);
+	m_entry_step.set_sensitive(false);
+	steps_to_process+=1u<<31;
+	sim_thread_notifier.notify_one();
 }
 
 void mainwindow::on_nextn_clicked()
 {
-
+	m_button_finish.set_sensitive(false);
+	m_button_next.set_sensitive(false);
+	m_button_nextn.set_sensitive(false);
+	m_entry_step.set_sensitive(false);
+	steps_to_process+=m_nextn;
+	sim_thread_notifier.notify_one();
 }
 
 void mainwindow::on_step_inserted(guint,const gchar*,guint)
@@ -154,5 +185,39 @@ void mainwindow::on_step_deleted(guint,guint)
 		m_nextn=std::stoi(text.raw());
 	else m_nextn=10;//默认值
 	m_button_nextn.set_label(Glib::ustring::compose("执行%1步",m_nextn));
+}
+
+bool mainwindow::on_time_out()
+{
+	if(sim_thread_done&&sim_thread.joinable())
+	{
+		sim_thread.join();
+		m_button_finish.set_sensitive(false);
+		m_button_next.set_sensitive(false);
+		m_button_nextn.set_sensitive(false);
+		m_entry_step.set_sensitive(false);
+	}
+	static thread_local char buffer[PIPE_BUF];
+	auto len=::read(pipe_fd[0],buffer,PIPE_BUF);
+	if(len>0)
+	{
+		std::string s(buffer,len);
+		auto &buf=*m_view_message.get_buffer().get();
+		buf.insert(buf.end(),s);
+		m_view_message.scroll_to(m_endmark);
+	}
+	state_mutex.lock();
+	m_lift0->update();
+	m_lift1->update();
+	m_wbutton->update();
+	state_mutex.unlock();
+	if(!sim_thread_done&&steps_to_process==0)
+	{
+		m_button_finish.set_sensitive(true);
+		m_button_next.set_sensitive(true);
+		m_button_nextn.set_sensitive(true);
+		m_entry_step.set_sensitive(true);
+	}
+	return true;
 }
 }
