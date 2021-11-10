@@ -13,6 +13,7 @@ extern event_queue_t event_queue;		                //事件队列
 extern zzc::vector<zzc::queue<passenger_t>> waiting_queues_up,waiting_queues_down;
 extern wbutton_t wall_buttons;			                //每层楼墙上的按钮
 extern std::array<lift_t,2> lifts;		                //两部电梯
+extern uint64_t random_seed;
 }
 
 namespace statistic

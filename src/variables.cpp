@@ -11,6 +11,7 @@ event_queue_t event_queue;		    //事件队列
 zzc::vector<zzc::queue<passenger_t>> waiting_queues_up,waiting_queues_down;
 wbutton_t wall_buttons;			    //每层楼墙上的按钮
 std::array<lift_t,2> lifts{0,1};	//两部电梯
+uint64_t random_seed;
 }
 
 namespace statistic

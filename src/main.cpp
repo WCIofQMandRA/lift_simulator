@@ -56,16 +56,12 @@ static void generate_passengers()
 	}
 }
 
-int main()
+int main(int argc,char **argv)
 {
 	std::cout<<std::setprecision(4)<<std::fixed;
-#ifdef NDEBUG
-	rand_engine.seed(std::random_device()());
-#else
-	auto seed=std::random_device()();
-	std::cout<<"Seed: "<<seed<<"\n\n";
-	rand_engine.seed(seed);
-#endif
+	variable::random_seed=argc==2?std::stoull(argv[1]):std::random_device()();
+//	std::cout<<"Seed: "<<variable::random_seed<<"\n\n";
+	rand_engine.seed(variable::random_seed);
 	load_constants();
 	{
 		using namespace variable;

@@ -47,6 +47,11 @@ mainwindow::mainwindow()
 	m_box_control.pack_start(m_button_nextn);
 	
 	m_vbox.pack_start(m_scrolled_message,Gtk::PACK_EXPAND_WIDGET,10);
+
+	m_vbox.pack_start(m_statusbar,Gtk::PACK_SHRINK);
+	m_statusbar.pack_start(m_status_seed,Gtk::PACK_SHRINK,10);
+	m_statusbar.pack_start(m_status_total_steps,Gtk::PACK_SHRINK,10);
+	m_statusbar.pack_start(m_status_total_events,Gtk::PACK_SHRINK);
 	
 	////////////////////////
 	//控制按钮
@@ -72,6 +77,12 @@ mainwindow::mainwindow()
 	m_view_message.set_wrap_mode(Gtk::WRAP_WORD_CHAR);
 	m_view_message.property_editable()=false;
 	m_endmark=m_view_message.get_buffer()->create_mark(m_view_message.get_buffer()->end(),false);
+	//状态栏
+	m_statusbar.set_halign(Gtk::ALIGN_END);
+	m_statusbar.set_valign(Gtk::ALIGN_END);
+	m_status_seed.set_markup(Glib::ustring::compose("<b>随机数种子</b>: %1",variable::random_seed));
+	m_status_total_steps.set_markup("<b>总步骤数</b>: 0");
+	m_status_total_events.set_markup("<b>总事件数</b>: 0");
 
 	m_button_next.signal_clicked().connect(sigc::mem_fun(*this,&mainwindow::on_next_clicked));
 	m_button_finish.signal_clicked().connect(sigc::mem_fun(*this,&mainwindow::on_finish_clicked));
@@ -83,7 +94,15 @@ mainwindow::mainwindow()
 	show_all_children();
 }
 
-mainwindow::~mainwindow(){}
+mainwindow::~mainwindow()
+{
+	if(sim_thread.joinable())
+	{
+		sim_thread_done=true;
+		sim_thread_notifier.notify_one();
+		sim_thread.join();
+	}
+}
 
 void mainwindow::thread_main()
 {
@@ -95,13 +114,17 @@ void mainwindow::thread_main()
 		while(steps_to_process==0)
 		{
 			sim_thread_notifier.wait(lock1);
+			if(sim_thread_done)
+				return;
 		}
+		++total_events;
 		bool printed=event_queue.print(str_out);
 		event_queue.call_and_pop(str_out);
 		if(printed)
 		{
 			str_out<<"\n";
 			--steps_to_process;
+			++total_steps;
 			if(state_mutex.try_lock())
 			{
 				lifts[0].load_state(m_lift_state0);
@@ -211,6 +234,10 @@ bool mainwindow::on_time_out()
 	m_lift1->update();
 	m_wbutton->update();
 	state_mutex.unlock();
+	m_status_total_steps.set_markup(Glib::ustring::compose("<b>总步骤数</b>: %1",
+		total_steps.load(std::memory_order_relaxed)));
+	m_status_total_events.set_markup(Glib::ustring::compose("<b>总事件数</b>: %1",
+		total_events.load(std::memory_order_relaxed)));
 	if(!sim_thread_done&&steps_to_process==0)
 	{
 		m_button_finish.set_sensitive(true);

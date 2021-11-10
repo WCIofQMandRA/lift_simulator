@@ -56,10 +56,13 @@ private:
 	Glib::RefPtr<Gtk::TextBuffer::Mark> m_endmark;
 	Gtk::TextView m_view_message;
 
+	Gtk::Box m_statusbar;
+	Gtk::Label m_status_seed,m_status_total_steps,m_status_total_events;
+
 	lift_state m_lift_state0,m_lift_state1;
 	wbutton_state m_wbutton_state;
 
-	std::atomic<size_t> steps_to_process=0;
+	std::atomic<size_t> steps_to_process=0,total_steps=0,total_events=0;
 	std::thread sim_thread;
 	std::atomic_bool sim_thread_done=false;
 	std::condition_variable sim_thread_notifier;
