@@ -20,7 +20,7 @@ cmake --build . --config Release
 
 ## 使用方法
 
-双击`bin/电梯模拟器.AppImage`（这其实并不是App Image，但`.AppImage`是我知道的唯一的在GNOME桌面环境下可以直接双击运行的动态可执行文件拓展名，其他拓展名会被识别成动态库而无法执行）即可运行，或者也可以在终端中输入``。软件界面简洁直观，无需额外解释。
+双击`bin/电梯模拟器.AppImage`（这其实并不是App Image，但`.AppImage`是我知道的唯一的在GNOME桌面环境下可以直接双击运行的动态可执行文件拓展名，其他拓展名会被识别成动态库而无法执行）即可运行，或者也可以在终端中输入`<软件的路径>/bin/电梯模拟器.AppImage`。软件界面简洁直观，无需额外解释。
 
 <img src="doc/img/user-interface.png" alt="user-interface" style="zoom:50%;" />
 
