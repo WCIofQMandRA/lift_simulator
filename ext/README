@@ -1,0 +1,4 @@
+本目录下的文件是电梯模拟器的外部依赖，它们的作者也是张子辰，不过它们【不是】
+电梯模拟器的一部分。这些文件以原本的许可证分发，并不一定被发布到公有领域。
+其中的preprocessor.h已位于公有领域，map_wrapper.hpp、splay_tree.hpp、
+vector.hpp使用GNU All-Permissive许可证发布。

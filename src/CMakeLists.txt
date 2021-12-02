@@ -6,6 +6,7 @@ aux_source_directory(${CMAKE_CURRENT_LIST_DIR} SRC_LIFT)
 
 add_executable(lift_simulator ${SRC_LIFT})
 target_compile_options(lift_simulator PRIVATE ${gtkmm_CFLAGS})
+target_include_directories(lift_simulator PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../ext)
 target_link_libraries(lift_simulator -pthread ${gtkmm_LDFLAGS})
 
 set_target_properties(lift_simulator PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
