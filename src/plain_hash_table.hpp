@@ -1,6 +1,8 @@
 //plain_hash_table.hpp: 简陋的散列表, 用于临时替代std::unordered_set<std::string>
-//Copyright (C) 2021-2022 张子辰
+//Author: 张子辰
 //This file is part of the 电梯模拟器.
+//电梯模拟器 is released into public domain,
+//see README.md for detail.
 
 #pragma once
 #include <string>

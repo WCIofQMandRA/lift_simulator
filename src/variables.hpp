@@ -1,6 +1,9 @@
 //variables.hpp: 变量
-//Copyright (C) 2021-2022 张子辰
+//Author: 张子辰
 //This file is part of the 电梯模拟器.
+//电梯模拟器 is released into public domain,
+//see README.md for detail.
+
 #include "event_queue.hpp"
 #include "lift.hpp"
 #include "passenger.hpp"
